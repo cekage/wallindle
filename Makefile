@@ -14,10 +14,15 @@ LDFLAGS=lib/curl_x86_64/lib/libcurl.a -DCURL_STATICLIB -Ilib/curl_x86_64/include
 
 EXEC=wallindle
 
+OTHERC=configmanager.c entries_common.c entries_parse.c http_request.c \
+	   json_common.c json_entries_parse.c json_oauth_parse.c oauth_manager.c \
+	   perform_entries.c shared.c \
+	   lib/jsmn/jsmn.c
+
 all: clean build exec
 
 build:
-	$(CC) $(CFLAGS) wallindle.c -o $(EXEC) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(EXEC).c $(OTHERC) -o $(EXEC) $(LDFLAGS)
 
 exec:
 	./$(EXEC)
