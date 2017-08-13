@@ -1,8 +1,15 @@
 #include <time.h>
+#include <inttypes.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 #include "shared.h"
+#include "configmanager.h"
+#include "entries_common.h"
 
-static char* WBEntryFetchingURL(WBoAuthCred* wbc) {
+char* WBEntryFetchingURL(WBoAuthCred* wbc) {
     const int last_week_in_utc = time(NULL) - 70 * 24 * 60;
 
 // TODO(k) Check real size

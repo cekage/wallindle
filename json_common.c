@@ -4,10 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <inttypes.h>
+
+#include <sys/types.h>
 
 #include "shared.h"
+#include "configmanager.h"
 
-static int JsonEquivTo(const char* json, const jsmntok_t* tok,  const char* s) {
+#include "json_common.h"
+
+int JsonEquivTo(const char* json, const jsmntok_t* tok,  const char* s) {
     int result;
 
     if (tok->type == JSMN_STRING
@@ -21,7 +28,7 @@ static int JsonEquivTo(const char* json, const jsmntok_t* tok,  const char* s) {
     return result;
 }
 
-static char* WBReadJsonFile(const char*
+char* WBReadJsonFile(const char*
                             filename) {
     FILE* f = fopen(filename, "r");
 
@@ -34,7 +41,7 @@ static char* WBReadJsonFile(const char*
     char* filecontent = calloc((unsigned long)filesize + 1UL, sizeof(char));
 
     if (NULL == filecontent) {
-        fprintf(stderr, "Cannot allocate %"PRIuPTR" for filecontent\n", filesize);
+        fprintf(stderr, "Cannot allocate %" PRIuPTR " for filecontent\n", filesize);
         return NULL;
     }
 

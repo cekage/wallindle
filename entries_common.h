@@ -1,6 +1,8 @@
 #ifndef ENTRIES_COMMON_H_INCLUDED
 #define ENTRIES_COMMON_H_INCLUDED
 
+#include "configmanager.h"
+
 typedef struct WBEntry {
     bool  is_archived;
     bool  is_starred;
@@ -8,8 +10,6 @@ typedef struct WBEntry {
     char* created_at;
 } WBEntry;
 
-static char* WBEntryFetchingURL(WBoAuthCred* wbc);
-
-#include "entries_common.c"
+char* WBEntryFetchingURL(WBoAuthCred* wbc);
 
 #endif//ENTRIES_COMMON_H_INCLUDED

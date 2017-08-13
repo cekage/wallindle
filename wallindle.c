@@ -10,6 +10,7 @@
 #include "json_entries_parse.h"
 #include "configmanager.h"
 #include "entries_parse.h"
+#include "entries_common.h"
 
 #include "shared.h"
 

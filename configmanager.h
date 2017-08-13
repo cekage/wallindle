@@ -13,26 +13,24 @@ typedef struct WBoAuthCred {
     char* token;
 } WBoAuthCred;
 
-static int WBConfigGet(WBoAuthCred* wbcred);
+int WBConfigGet(WBoAuthCred* wbcred);
 
-static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
+int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
 
-static int _WBReadConfiguration(const char* filename,
+int _WBReadConfiguration(const char* filename,
                                 off_t filesize, char** filecontent);
 
-static off_t CheckConfSize(const char* filename);
+off_t CheckConfSize(const char* filename);
 
-static void  WBConfigPrint(const WBoAuthCred* wbc);
-static int WBConfigStringSet(const char* content,   size_t contentsize,
+void  WBConfigPrint(const WBoAuthCred* wbc);
+int WBConfigStringSet(const char* content,   size_t contentsize,
                              char** wbcfield);
 
-static int WBConfigInit(WBoAuthCred* wbc);
-static void  WBConfigCleanup(WBoAuthCred* wbc);
+int WBConfigInit(WBoAuthCred* wbc);
+void  WBConfigCleanup(WBoAuthCred* wbc);
 
-static char* WBConfigForgeoAuthURL(WBoAuthCred* wbc);
+char* WBConfigForgeoAuthURL(WBoAuthCred* wbc);
 
-static bool  WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
-
-#include "configmanager.c"
+bool  WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
 
 #endif//CONFIGMANAGER_H

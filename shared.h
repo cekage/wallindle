@@ -1,8 +1,6 @@
 #ifndef SHARED_H_INCLUDED
 #define SHARED_H_INCLUDED
 
-#include <sys/param.h>
-
 #ifdef __arm__
 #define DBUS_CMD "/usr/bin/dbus-send"
 #else
@@ -39,25 +37,5 @@
 
 typedef enum {false, true} bool ;
 
-
-static int StoreContent(const char* src, size_t contentsize, char** dest) {
-    const  size_t  realsize = MIN(contentsize, LIMIT_DYNAMIC_STRING);
-
-// TODO(k) find which part transmit an uninitialized dest!
-    if (NULL == *dest) {
-        *dest = calloc((realsize + 1), sizeof(char));
-    } else {
-        *dest = realloc(*dest, (realsize + 1) * sizeof(char));
-    }
-
-    if (NULL == *dest) {
-        fprintf(stderr, "%s", "not enough memory (realloc returned NULL)\n");
-        return WNDL_ERROR;
-    }
-
-    strncpy(*dest, src, realsize);
-    *(*dest + realsize) = 0;
-    return WNDL_OK;
-}
-
+int StoreContent(const char* src, size_t contentsize, char** dest);
 #endif//SHARED_H_INCLUDED

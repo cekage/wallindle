@@ -8,13 +8,11 @@ typedef struct MemoryStruct {
     size_t size;
 } MemoryStruct;
 
-static  size_t  WriteMemoryCallback(const char* contents,
+size_t  WriteMemoryCallback(const char* contents,
                                     size_t  size,  size_t  nmemb, void* userp);
 
 int GetJSON(const char* url, MemoryStruct* jsonresponse);
 
 int GetEbook(const char* url, const char* filename);
-
-#include "http_request.c"
 
 #endif/*HTTP_REQUEST_H*/

@@ -3,12 +3,14 @@
 
 #include "configmanager.h"
 
-static bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe);
+bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe);
 
 
-static char* WBConfigForgeDownloadURL(const WBEntry* wbe,
+char* WBConfigForgeDownloadURL(const WBEntry* wbe,
                                       const WBoAuthCred* wbcred);
 
-#include "perform_entries.c"
+char* GetEntryFileName(const WBEntry* wbe);
+
+void PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred);
 
 #endif//PERFORM_ENTRIES_H_INCLUDED

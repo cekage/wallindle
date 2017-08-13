@@ -1,9 +1,18 @@
 //OriginalcodefromSergeZaitsevhttp://zserge.com
 //https://github.com/zserge/jsmn/blob/master/example/simple.c
 
-#include "json_common.h"
+#include <string.h>
+#include <stdio.h>
 
-static char* ExtractToken(const char* jsonresponse) {
+
+#include "./lib/jsmn/jsmn.h"
+
+
+#include "json_common.h"
+#include "json_oauth_parse.h"
+#include "shared.h"
+
+char* ExtractToken(const char* jsonresponse) {
 #define NEXT_ITEM ++index
     int result;
 

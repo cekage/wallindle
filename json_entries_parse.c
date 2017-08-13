@@ -4,13 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
+
+#include <sys/param.h>
 
 #include "entries_common.h"
 #include "json_common.h"
 #include "perform_entries.h"
 
+#include "json_entries_parse.h"
 
-static int JsonEntriesParse(const char* jsonresponse, WBoAuthCred* wbc) {
+int JsonEntriesParse(const char* jsonresponse, WBoAuthCred* wbc) {
 #define NEXT_ITEM ++index
     int index;
     int token_count;

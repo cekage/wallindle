@@ -5,9 +5,9 @@
 
 #include <errno.h>
 
-#ifndef CONFIGMANAGER_H
+//#ifndef CONFIGMANAGER_H
 #include "configmanager.h"
-#endif
+//#endif
 
 #include <inttypes.h>
 #include <sys/param.h>
@@ -16,8 +16,7 @@
 
 #include "shared.h"
 
-
-static off_t CheckConfSize(const char* filename) {
+off_t CheckConfSize(const char* filename) {
     struct stat st;
 
     off_t result;
@@ -39,7 +38,7 @@ static off_t CheckConfSize(const char* filename) {
     return result;
 }
 
-static int _WBReadConfiguration(const char* filename,
+int _WBReadConfiguration(const char* filename,
                                 off_t filesize, char** filecontent) {
     FILE* f = fopen(filename, "r");
 
@@ -61,11 +60,11 @@ static int _WBReadConfiguration(const char* filename,
     return WNDL_OK;
 }
 
-static int WBConfigGet(WBoAuthCred* wbcred) {
+int WBConfigGet(WBoAuthCred* wbcred) {
     return _WBConfigGet(wbcred, DEFAULT_CONFIG_FILE);
 }
 
-static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
+int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     const char* delim = " ";
 
     off_t filesize;
@@ -160,7 +159,7 @@ static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
 }
 
 // TODO(k) Assign default null values : https://stackoverflow.com/a/749690
-static int WBConfigInit(WBoAuthCred* wbc) {
+int WBConfigInit(WBoAuthCred* wbc) {
 #define CHECKFIELD(FD) result &= (NULL!=wbc->FD);
 #define INITFIELD(FD) wbc->FD=calloc(1, sizeof(char)); CHECKFIELD(FD)
     bool  result = WNDL_OK;
@@ -175,7 +174,7 @@ static int WBConfigInit(WBoAuthCred* wbc) {
 #undef  CHECKFIELD
 }
 
-static void  WBConfigCleanup(WBoAuthCred* wbc) {
+void  WBConfigCleanup(WBoAuthCred* wbc) {
 #define FREEFIELD(FD) free(wbc->FD);wbc->FD=NULL;
     FREEFIELD(wallabag_host);
     FREEFIELD(client_id);
@@ -186,12 +185,12 @@ static void  WBConfigCleanup(WBoAuthCred* wbc) {
 #undef  FREEFIELD
 }
 
-static int WBConfigStringSet(const char* content,  size_t  contentsize,
+int WBConfigStringSet(const char* content,  size_t  contentsize,
                              char** wbcfield) {
     return StoreContent(content, contentsize, wbcfield);
 }
 
-static void  WBConfigPrint(const WBoAuthCred* wbc) {
+void  WBConfigPrint(const WBoAuthCred* wbc) {
 #define PRINTFIELD(FD) printf("wbc->%s(%"PRIuPTR"o.)=%s\n",#FD,strlen(wbc->FD),wbc->FD)
     PRINTFIELD(wallabag_host);
     PRINTFIELD(client_id);
@@ -203,7 +202,7 @@ static void  WBConfigPrint(const WBoAuthCred* wbc) {
 }
 
 
-static char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
+char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
     const  size_t  url_size = ( sizeof(AUTH_URL_MASK)
                                 - 5 * ( sizeof("%s") - 1)
                                 + strlen(wbc->wallabag_host)
@@ -220,7 +219,7 @@ static char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
     return url;
 }
 
-static bool  WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2) {
+bool  WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2) {
 #define CHECKFIELD(FD) (0==strcmp(wb1->FD,wb2->FD))
     bool  result;
     result = CHECKFIELD(wallabag_host);
