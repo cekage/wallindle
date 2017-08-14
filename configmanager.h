@@ -18,13 +18,13 @@ int WBConfigGet(WBoAuthCred* wbcred);
 int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
 
 int _WBReadConfiguration(const char* filename,
-                                off_t filesize, char** filecontent);
+                         off_t filesize, char** filecontent);
 
-off_t CheckConfSize(const char* filename);
+off_t CheckConfSize(const char* filename, bool check_min_max);
 
 void  WBConfigPrint(const WBoAuthCred* wbc);
 int WBConfigStringSet(const char* content,   size_t contentsize,
-                             char** wbcfield);
+                      char** wbcfield);
 
 int WBConfigInit(WBoAuthCred* wbc);
 void  WBConfigCleanup(WBoAuthCred* wbc);
