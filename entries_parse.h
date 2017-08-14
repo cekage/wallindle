@@ -4,6 +4,6 @@
 void  WBReadJsonEntries(WBoAuthCred* wbc, const char* filename);
 
 void  WBReadDownloadedJsonEntries(const char* jsoncontent,
-        WBoAuthCred* wbc);
+                                  WBoAuthCred* wbc);
 
 #endif//ENTRIES_PARSE_H_INCLUDED
