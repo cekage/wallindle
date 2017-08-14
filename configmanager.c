@@ -16,7 +16,7 @@
 
 #include "shared.h"
 
-off_t CheckConfSize(const char* filename) {
+off_t CheckConfSize(const char* filename, bool check_min_max) {
     struct stat st;
 
     off_t result;
@@ -26,7 +26,8 @@ off_t CheckConfSize(const char* filename) {
         result = WNDL_ERROR;
     }
 
-    else if (MIN_CONFFILE_SIZE > st.st_size || MAX_CONFFILE_SIZE < st.st_size) {
+    else if (check_min_max && (MIN_CONFFILE_SIZE > st.st_size
+                               || MAX_CONFFILE_SIZE < st.st_size)) {
         fprintf(stderr,
                 "Suspiscious size for %s : MIN_CONFFILE_SIZE=%d MAX_CONFFILE_SIZE=%d\n",
                 filename, MIN_CONFFILE_SIZE, MAX_CONFFILE_SIZE);
@@ -39,7 +40,7 @@ off_t CheckConfSize(const char* filename) {
 }
 
 int _WBReadConfiguration(const char* filename,
-                                off_t filesize, char** filecontent) {
+                         off_t filesize, char** filecontent) {
     FILE* f = fopen(filename, "r");
 
     if (NULL == f) {
@@ -72,7 +73,7 @@ int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     int readresult;
     char* token;
 
-    filesize = CheckConfSize(cfg_filename);
+    filesize = CheckConfSize(cfg_filename, true);
 
     if (WNDL_ERROR == filesize) {
         return WNDL_ERROR;
@@ -186,7 +187,7 @@ void  WBConfigCleanup(WBoAuthCred* wbc) {
 }
 
 int WBConfigStringSet(const char* content,  size_t  contentsize,
-                             char** wbcfield) {
+                      char** wbcfield) {
     return StoreContent(content, contentsize, wbcfield);
 }
 
