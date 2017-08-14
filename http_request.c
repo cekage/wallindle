@@ -13,7 +13,7 @@
 #include "http_request.h"
 
 size_t  WriteMemoryCallback(const char* contents,
-                                    size_t  size,  size_t  nmemb, void* userp) {
+                            size_t  size,  size_t  nmemb, void* userp) {
     size_t realsize = size * nmemb;
     MemoryStruct* mem = (MemoryStruct*) userp;
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);

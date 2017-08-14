@@ -9,7 +9,7 @@ typedef struct MemoryStruct {
 } MemoryStruct;
 
 size_t  WriteMemoryCallback(const char* contents,
-                                    size_t  size,  size_t  nmemb, void* userp);
+                            size_t  size,  size_t  nmemb, void* userp);
 
 int GetJSON(const char* url, MemoryStruct* jsonresponse);
 
