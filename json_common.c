@@ -74,11 +74,10 @@ static char* _WBReadFile(const char* filename, bool isConfig) {
         return NULL;
     }
 
-    const  size_t  totalread = fread(filecontent, sizeof(char), (size_t)filesize,
-                                     f);
+    const  size_t  totalread = fread(filecontent, sizeof(char),
+                                    (size_t)filesize, f);
     fclose(f);
 
-    // TODO(k) Use WB error/ok
     if ( sizeof(char) > totalread) {
         fprintf(stderr, "Too small content %"PRIuPTR" bytes\n", totalread);
         free(filecontent);

@@ -45,13 +45,13 @@ char* ExtractToken(const char* jsonresponse) {
 
     if (result < 0) {
         // TODO(k) fprintf!
-        printf("Failed to parse JSON: %d\n", result);
+        fprintf(stderr, "Failed to parse JSON: %d\n", result);
         return NULL;
     }
 
     if (result < 1 || tokens[0].type != JSMN_OBJECT) {
         // TODO(k) fprintf!
-        printf("Object expected\n");
+        fprintf(stderr, "Object expected\n");
         return NULL;
     }
 

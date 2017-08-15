@@ -177,7 +177,7 @@ static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     return WNDL_OK;
 }
 
-// TODO(k) Assign default null values : https://stackoverflow.com/a/749690
+// TODO(k) Assign default null values, avoid useless calloc();
 wd_result WBConfigInit(WBoAuthCred* wbc) {
 #define CHECKFIELD(FD) result &= (NULL!=wbc->FD);
 #define INITFIELD(FD) wbc->FD=calloc(1, sizeof(char)); CHECKFIELD(FD)

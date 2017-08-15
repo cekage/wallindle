@@ -26,9 +26,9 @@
 #include "entries_common.h"
 
 char* WBEntryFetchingURL(WBoAuthCred* wbc) {
-    const int last_week_in_utc = time(NULL) - 7 * 24 * 60;
+    const int last_week_in_utc = time(NULL) - UP_TO_X_DAYS * 24 * 60;
 
-    // TODO(k) Check real size
+    // TODO(k) Check real size instead of MAX_INT_STRLEN
     const  size_t  url_size = ( sizeof(FETCH_ENTRIES_MASK) - 1 //themasksize1
                                 - (2 * ( sizeof("%s") - 1) + ( sizeof("%d") - 1)) //minusformats
                                 + MAX_INT_STRLEN//plusmaxintsize

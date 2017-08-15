@@ -17,6 +17,8 @@
 #ifndef SHARED_H_INCLUDED
 #define SHARED_H_INCLUDED
 
+#include <stdbool.h>
+
 #ifdef __arm__
 #define DBUS_CMD "/usr/bin/dbus-send"
 #else
@@ -56,11 +58,12 @@
 
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 
-// TODO(k) replace #define WNDL_OK
-typedef enum {WNDL_OK, WNDL_ERROR} wd_result;
+#define UP_TO_X_DAYS (7)
 
-#include <stdbool.h>
-//typedef enum {false, true} bool;
+typedef enum {
+    WNDL_OK = 0,
+    WNDL_ERROR = -1
+} wd_result;
 
 wd_result StoreContent(const char* src, size_t contentsize, char** dest);
 

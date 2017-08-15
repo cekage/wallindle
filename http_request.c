@@ -58,7 +58,6 @@ wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
     curl_easy_setopt(curl_handle, CURLOPT_URL, url);
     /* send all data to this function */
 
-    // TODO(k) is it still usefull ?
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
     /* we pass our 'chunk' struct to the callback function */
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)jsonresponse);
