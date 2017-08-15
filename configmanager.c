@@ -56,7 +56,7 @@ wd_result _WBReadConfiguration(const char* filename,
     fclose(f);
 
     if ( sizeof(char) > totalread) {
-        fprintf(stderr, "Cannot determine sizeof %s:%s\n",               filename,
+        fprintf(stderr, "Cannot determine sizeof %s:%s\n", filename,
                 strerror(errno));
         return WNDL_ERROR;
     }
@@ -96,8 +96,8 @@ static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
         return WNDL_ERROR;
     }
 
-//printf("%"PRIuPTR"%s\n",filesize,filecontent);
-//   WBConfigPrint(wbcred);
+    //printf("%"PRIuPTR"%s\n",filesize,filecontent);
+    //   WBConfigPrint(wbcred);
 
     token = strtok(filecontent, delim);
 
@@ -157,7 +157,7 @@ static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     }
 
     free(filecontent);
-//WBConfigPrint(wbcred);
+    //WBConfigPrint(wbcred);
     return WNDL_OK;
 }
 
@@ -188,7 +188,7 @@ void WBConfigCleanup(WBoAuthCred* wbc) {
 #undef  FREEFIELD
 }
 
-int WBConfigStringSet(const char* content,  size_t  contentsize,
+int WBConfigStringSet(const char* content, size_t  contentsize,
                       char** wbcfield) {
     return StoreContent(content, contentsize, wbcfield);
 }

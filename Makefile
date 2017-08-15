@@ -39,7 +39,8 @@ astyle:
 	astyle --mode=c --style=attach --align-pointer=type --align-reference=name --add-braces \
 	--add-one-line-braces --attach-classes --attach-closing-while --max-code-length=80 \
 	--indent=spaces --break-blocks --suffix=none --lineend=linux \
-	--pad-header --pad-oper --pad-comma --indent=spaces=4 *.c *.h
+	--pad-header --pad-oper --pad-comma --indent=spaces=4 --indent-col1-comments \
+	 *.c *.h
 
 arm:
 	$(eval CC := arm-linux-gnueabi-gcc)

@@ -33,7 +33,7 @@ static int _GetTokenCount(const char* jsonresponse) {
 }
 
 static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count) {
-//    jsmntok_t* tokens = calloc(count * 10, sizeof(jsmntok_t));
+    //    jsmntok_t* tokens = calloc(count * 10, sizeof(jsmntok_t));
 
     jsmntok_t* tokens = calloc(count + 1, sizeof(jsmntok_t));
 
@@ -87,13 +87,13 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
     jsmn_init(&parser);
     jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
                tokens, token_count);
-//    jsmntok_t tokens= _AllocateTokens(jsonresponse,token_count);
-//    if (NULL = tokens) { return NULL; }
+    //    jsmntok_t tokens= _AllocateTokens(jsonresponse,token_count);
+    //    if (NULL = tokens) { return NULL; }
 
 
     if (tokens[0].type != JSMN_OBJECT) {
         printf("Object expected\n");
-//        free(tokens);
+        //        free(tokens);
         return NULL;
     }
 
@@ -115,12 +115,12 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
     if (pages < 1) {
         printf("pages primitive >1 expected\n");
-//        free(tokens);
+        //        free(tokens);
         return NULL;
     }
 
-//    printf("pages primitive found @ index = %d ---> %.*s\n", index, 20,
-//           jsonresponse + tokens[index].start);
+    //    printf("pages primitive found @ index = %d ---> %.*s\n", index, 20,
+    //           jsonresponse + tokens[index].start);
 
     /*
      * Searching total
@@ -129,13 +129,13 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
                                 "total", JSMN_PRIMITIVE, index);
 
     if (index == token_count) {
-//        printf("total primitive expected\n");
-//        free(tokens);
+        //        printf("total primitive expected\n");
+        //        free(tokens);
         return NULL;
     }
 
-//    printf("total primitive found @ index = %d ---> %.*s\n", index, 20,
-//           jsonresponse + tokens[index].start);
+    //    printf("total primitive found @ index = %d ---> %.*s\n", index, 20,
+    //           jsonresponse + tokens[index].start);
     char* str_max_entries = NULL;
     StoreContent(jsonresponse + tokens[index].start,
                  MIN(tokens[index].end - tokens[index].start, 4),
@@ -145,7 +145,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
     if (max_entries < 1) {
         printf("total primitive >1 expected\n");
-//        free(tokens);
+        //        free(tokens);
         return NULL;
     }
 
@@ -159,52 +159,52 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
     if (index == token_count) {
         printf("_embedded object expected\n");
-//        free(tokens);
+        //        free(tokens);
         return NULL;
     }
 
-//    printf("_embedded object found @ index = %d ---> %.*s\n", index, 20,
-//           jsonresponse + tokens[index].start);
+    //    printf("_embedded object found @ index = %d ---> %.*s\n", index, 20,
+    //           jsonresponse + tokens[index].start);
 
     index = _GetJsonKeyPosition(jsonresponse, tokens, token_count,
                                 "items", JSMN_ARRAY, index);
 
     if (index == token_count) {
         printf("items array expected\n");
-//        free(tokens);
+        //        free(tokens);
         return NULL;
     }
 
-//    printf("items array found @ index = %d ---> %.*s\n", index, 20,
-//           jsonresponse + tokens[index].start);
+    //    printf("items array found @ index = %d ---> %.*s\n", index, 20,
+    //           jsonresponse + tokens[index].start);
 
-//   WBEntry entries[max_entries + 1];
+    //   WBEntry entries[max_entries + 1];
     WBEntry* entries = calloc(max_entries + 1, sizeof(WBEntry));
 
-//    printf(" adding true\n");
+    //    printf(" adding true\n");
 
-//    printf("@index = %d ---> %.*s\n", index, 20,
-//           jsonresponse + tokens[index].start);
+    //    printf("@index = %d ---> %.*s\n", index, 20,
+    //           jsonresponse + tokens[index].start);
     NEXT_ITEM;
     NEXT_ITEM;
 
-//    printf("DO ! \n");
+    //    printf("DO ! \n");
     unsigned int entry_index = 0;
 
     do { // new entry
         entries[entry_index] = (WBEntry) {.id = -1, .created_at = NULL};
         --index;
         int item_end = tokens[index].end;
-//        printf("\n** FIRST DO ** @%d index = %d ---> %.*s TO %d\n", tokens[index].start,
-//               index, 30, //MIN(20,tokens[index].end - tokens[index].start),
-//               jsonresponse + tokens[index].start, item_end);
+        //        printf("\n** FIRST DO ** @%d index = %d ---> %.*s TO %d\n", tokens[index].start,
+        //               index, 30, //MIN(20,tokens[index].end - tokens[index].start),
+        //               jsonresponse + tokens[index].start, item_end);
 
         do {
-//            _TokenPrint(tokens[index]);
-//            if (++limit<10)
-//            printf("@%d index = %d ---> %.*s\n", tokens[index].start, index, MIN(20,
-//                    tokens[index].end - tokens[index].start),
-//                   jsonresponse + tokens[index].start);
+            //            _TokenPrint(tokens[index]);
+            //            if (++limit<10)
+            //            printf("@%d index = %d ---> %.*s\n", tokens[index].start, index, MIN(20,
+            //                    tokens[index].end - tokens[index].start),
+            //                   jsonresponse + tokens[index].start);
 
             if (_JsonEquivTo(jsonresponse, &tokens[index], "id") == 0) {
                 char* value = NULL;
@@ -225,24 +225,24 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
             }
 
-//            if (limit<10)
-//            printf("end while ? index %d vs token_count %d || item_end %d vs %d\n\n", index,
-//                   token_count, tokens[index].start, item_end);
+            //            if (limit<10)
+            //            printf("end while ? index %d vs token_count %d || item_end %d vs %d\n\n", index,
+            //                   token_count, tokens[index].start, item_end);
             NEXT_ITEM;
 
         } while (index < token_count && tokens[index].start < item_end);
 
-//        if (index == token_count) { break; }
+        //        if (index == token_count) { break; }
 
-//        printf("END WHILE item_end ! \n\n");
-//        _PrintEntry(&entries[entry_index]);
-//        printf("\n\n");
+        //        printf("END WHILE item_end ! \n\n");
+        //        _PrintEntry(&entries[entry_index]);
+        //        printf("\n\n");
         ++entry_index;
         NEXT_ITEM;
-//        printf("end while ? entry_index %d vs %lu\n", entry_index, max_entries);
+        //        printf("end while ? entry_index %d vs %lu\n", entry_index, max_entries);
     } while (index < token_count && entry_index < max_entries);
 
-//    printf("END WHILE entry_index ! \n\n\n\n");
+    //    printf("END WHILE entry_index ! \n\n\n\n");
 
     entries[entry_index] = (WBEntry) {.id = 0, .created_at = NULL};
 

@@ -17,8 +17,8 @@ static void _WBReadJsonEntries(const char* filename) {
 }
 
 void WBReadDownloadedJsonEntries(const char* jsoncontent) {
-//    printf("--8<--snip--8<--\n%.*s\n--8<--snip--8<--\n", (int)MIN(50,
-//            strlen(jsoncontent)), jsoncontent);
+    //    printf("--8<--snip--8<--\n%.*s\n--8<--snip--8<--\n", (int)MIN(50,
+    //            strlen(jsoncontent)), jsoncontent);
     WBEntry* entries = JsonGetEntries(jsoncontent);
 
     // Clean all created_at string

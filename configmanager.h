@@ -1,9 +1,9 @@
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
-#include "shared.h"
-
 #include <sys/types.h>
+
+#include "shared.h"
 
 typedef struct WBoAuthCred {
     char* wallabag_host;
@@ -19,7 +19,7 @@ wd_result WBConfigGet(WBoAuthCred* wbcred);
 off_t CheckConfSize(const char* filename, bool check_min_max);
 
 
-int WBConfigStringSet(const char* content,   size_t contentsize,
+int WBConfigStringSet(const char* content, size_t contentsize,
                       char** wbcfield);
 
 wd_result WBConfigInit(WBoAuthCred* wbc);

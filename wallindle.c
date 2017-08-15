@@ -69,8 +69,8 @@ int main(void ) {
         exit(EXIT_FAILURE);
     }
 
-//    authjsonresponse.memory = NULL;
-//    authjsonresponse.size = 0;
+    //    authjsonresponse.memory = NULL;
+    //    authjsonresponse.size = 0;
 
 
     if (WNDL_ERROR == GetJSON(oauthurl, &authjsonresponse)) {
@@ -99,44 +99,45 @@ int main(void ) {
 
     free(getentriesurl);
 
-//    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
+    //    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
 
     entries = JsonGetEntries(entriesjsonresponse.memory);
     free(entriesjsonresponse.memory);
 
     if (NULL != entries) {
-    EnsureEbookDirExists();
+        EnsureEbookDirExists();
 
 
 
-    for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
+        for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
 
-//        _PrintEntry(&entries[i]);
-        filename = GetEntryFileName(&entries[i]);
+            //        _PrintEntry(&entries[i]);
+            filename = GetEntryFileName(&entries[i]);
 
-        if (!IsEbookAlreadyDownloaded(filename)) {
-            ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
+            if (!IsEbookAlreadyDownloaded(filename)) {
+                ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
 
-            if (WNDL_ERROR == GetEbook(ebookurl, filename)) {
-                printf("fetching %s failed\n", ebookurl);
-            };
+                if (WNDL_ERROR == GetEbook(ebookurl, filename)) {
+                    printf("fetching %s failed\n", ebookurl);
+                };
 
-            free(ebookurl);
+                free(ebookurl);
 
-            ebookurl = NULL;
-        } else {
-//            printf("%s already downloaded !\n", filename);
+                ebookurl = NULL;
+            } else {
+                //            printf("%s already downloaded !\n", filename);
+            }
+
+            free(filename);
+            filename = NULL;
+            free(entries[i].created_at);
+            entries[i].created_at = NULL;
         }
 
-        free(filename);
-        filename = NULL;
-        free(entries[i].created_at);
-        entries[i].created_at = NULL;
+        free(entries);
+        UpdateKindleCatalog();
     }
 
-    free(entries);
-    UpdateKindleCatalog();
-    }
     WBConfigCleanup(&a_wbc);
 
 
