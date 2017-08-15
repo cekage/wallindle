@@ -37,7 +37,7 @@ size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
 
     if (mem->memory == NULL) {
         /* out of memory! */
-        printf("not enough memory (realloc returned NULL)\n");
+        fprintf(stderr, "not enough memory (realloc returned NULL)\n");
         return 0;
     }
 

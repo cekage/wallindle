@@ -108,7 +108,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
 
     if (tokens[0].type != JSMN_OBJECT) {
-        printf("Object expected\n");
+        fprintf(stderr, "Object expected\n");
         //        free(tokens);
         return NULL;
     }
@@ -130,7 +130,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
     free(str_pages);
 
     if (pages < 1) {
-        printf("pages primitive >1 expected\n");
+        fprintf(stderr, "pages primitive >1 expected\n");
         //        free(tokens);
         return NULL;
     }
@@ -160,7 +160,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
     free(str_max_entries);
 
     if (max_entries < 1) {
-        printf("total primitive >1 expected\n");
+        fprintf(stderr, "total primitive >1 expected\n");
         //        free(tokens);
         return NULL;
     }
@@ -174,7 +174,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
                                 "_embedded", JSMN_OBJECT, index);
 
     if (index == token_count) {
-        printf("_embedded object expected\n");
+        fprintf(stderr, "_embedded object expected\n");
         //        free(tokens);
         return NULL;
     }
@@ -186,7 +186,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
                                 "items", JSMN_ARRAY, index);
 
     if (index == token_count) {
-        printf("items array expected\n");
+        fprintf(stderr, "items array expected\n");
         //        free(tokens);
         return NULL;
     }
