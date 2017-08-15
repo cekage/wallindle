@@ -5,9 +5,10 @@
 
 bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe);
 
+bool  IsEbookAlreadyDownloaded(const char* ebookfile);
 
 char* WBConfigForgeDownloadURL(const WBEntry* wbe,
-                                      const WBoAuthCred* wbcred);
+                               const WBoAuthCred* wbcred);
 
 char* GetEntryFileName(const WBEntry* wbe);
 

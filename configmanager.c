@@ -5,9 +5,6 @@
 
 #include <errno.h>
 
-//#ifndef CONFIGMANAGER_H
-#include "configmanager.h"
-//#endif
 
 #include <inttypes.h>
 #include <sys/param.h>
@@ -15,6 +12,15 @@
 #include <sys/types.h>
 
 #include "shared.h"
+
+#include "configmanager.h"
+
+static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
+static int _WBReadConfiguration(const char* filename,
+                                off_t filesize, char** filecontent);
+static void WBConfigPrint(const WBoAuthCred* wbc);
+static bool WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
+
 
 off_t CheckConfSize(const char* filename, bool check_min_max) {
     struct stat st;
@@ -39,8 +45,8 @@ off_t CheckConfSize(const char* filename, bool check_min_max) {
     return result;
 }
 
-int _WBReadConfiguration(const char* filename,
-                         off_t filesize, char** filecontent) {
+static int _WBReadConfiguration(const char* filename,
+                                off_t filesize, char** filecontent) {
     FILE* f = fopen(filename, "r");
 
     if (NULL == f) {
@@ -65,7 +71,7 @@ int WBConfigGet(WBoAuthCred* wbcred) {
     return _WBConfigGet(wbcred, DEFAULT_CONFIG_FILE);
 }
 
-int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
+static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     const char* delim = " ";
 
     off_t filesize;
@@ -95,7 +101,7 @@ int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     }
 
 //printf("%"PRIuPTR"%s\n",filesize,filecontent);
-//    WBConfigPrint(wbcred);
+//   WBConfigPrint(wbcred);
 
     token = strtok(filecontent, delim);
 
@@ -175,7 +181,7 @@ int WBConfigInit(WBoAuthCred* wbc) {
 #undef  CHECKFIELD
 }
 
-void  WBConfigCleanup(WBoAuthCred* wbc) {
+void WBConfigCleanup(WBoAuthCred* wbc) {
 #define FREEFIELD(FD) free(wbc->FD);wbc->FD=NULL;
     FREEFIELD(wallabag_host);
     FREEFIELD(client_id);
@@ -191,7 +197,7 @@ int WBConfigStringSet(const char* content,  size_t  contentsize,
     return StoreContent(content, contentsize, wbcfield);
 }
 
-void  WBConfigPrint(const WBoAuthCred* wbc) {
+static void WBConfigPrint(const WBoAuthCred* wbc) {
 #define PRINTFIELD(FD) printf("wbc->%s(%"PRIuPTR"o.)=%s\n",#FD,strlen(wbc->FD),wbc->FD)
     PRINTFIELD(wallabag_host);
     PRINTFIELD(client_id);
@@ -212,23 +218,20 @@ char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
                                 + strlen(wbc->username)
                                 + strlen(wbc->password)
                               ) * sizeof(char);
-    //printf("\n*url_size=%"PRIuPTR"and sizeof(\"%%s\")%d",url_size, sizeof("%s"));
     char* url = calloc(url_size + 1, sizeof(char));
-    //printf("\nAvant:%"PRIuPTR"\"%s\"--<\n",url_size,url);
     snprintf(url, url_size, AUTH_URL_MASK, wbc->wallabag_host, wbc->client_id, wbc->client_secret, wbc->username, wbc->password);
-    //printf("\nAprès:%"PRIuPTR"%s\n",url_size,url);
     return url;
 }
 
-bool  WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2) {
-#define CHECKFIELD(FD) (0==strcmp(wb1->FD,wb2->FD))
-    bool  result;
-    result = CHECKFIELD(wallabag_host);
-    result &= CHECKFIELD(client_id);
-    result &= CHECKFIELD(client_secret);
-    result &= CHECKFIELD(username);
-    result &= CHECKFIELD(password);
-    result &= CHECKFIELD(token);
+static bool WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2) {
+#define CHECKFIELD(FD) result &=(0==strcmp(wb1->FD,wb2->FD))
+    bool  result = true;
+    CHECKFIELD(wallabag_host);
+    CHECKFIELD(client_id);
+    CHECKFIELD(client_secret);
+    CHECKFIELD(username);
+    CHECKFIELD(password);
+    CHECKFIELD(token);
     return result;
 #undef  CHECKFIELD
 }

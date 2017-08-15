@@ -21,12 +21,12 @@ typedef struct WBoAuth2Struct {
 
 int WBoAuth2Init(WBoAuth2Struct* wbo);
 
-void  WBoAuth2Cleanup(WBoAuth2Struct* wbo);
+void WBoAuth2Cleanup(WBoAuth2Struct* wbo);
 
-void  WBoAuth2Print(const WBoAuth2Struct* wbo);
+void WBoAuth2Print(const WBoAuth2Struct* wbo);
 
-int  WBoAuth2StringSet(const char* content,
-                              size_t contentsize, char** wbofield);
+int WBoAuth2StringSet(const char* content,
+                      size_t contentsize, char** wbofield);
 
 
 #endif//OAUTH_MANAGER_H

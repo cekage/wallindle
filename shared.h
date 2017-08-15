@@ -25,17 +25,27 @@
 #define FORMAT_EXPORT "mobi"
 
 #ifdef __arm__
-#define ENTRY_MASK "/mnt/base-us/documents/wallabag/%08lx."FORMAT_EXPORT
+#define ENTRY_MASK_DIR "/mnt/base-us/documents/wallabag"
 #else
-#define ENTRY_MASK "./entries/%08lx."FORMAT_EXPORT
+#define ENTRY_MASK_DIR "./entries"
 #endif
 
-#define DOWNLOAD_URL_MASK "http://%s/api/entries/%lu/export."FORMAT_EXPORT"?access_token=%s"
-#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=500&page=1&since=%d&sort=created"
+#define ENTRY_MASK ENTRY_MASK_DIR "/%08lx." FORMAT_EXPORT
+
+#define MAXIMUM_ENTRIES (500)
+#define SMAXIMUM_ENTRIES "500"
+
+#define DOWNLOAD_URL_MASK "http://%s/api/entries/%lu/export." FORMAT_EXPORT "?access_token=%s"
+#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&saince=%d&sort=created"
 
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 
-typedef enum {false, true} bool ;
+// TODO(k) replace #define WNDL_OK
+//typedef enum {WNDL_OK, WNDL_ERROR} wd_result;
+
+typedef enum {false, true} bool;
 
 int StoreContent(const char* src, size_t contentsize, char** dest);
+
+void EnsureEbookDirExists();
 #endif//SHARED_H_INCLUDED

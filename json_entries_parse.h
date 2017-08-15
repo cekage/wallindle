@@ -1,10 +1,9 @@
 #ifndef JSON_PARSE_H_INCLUDED
 #define JSON_PARSE_H_INCLUDED
 
-#include "configmanager.h"
+#include "entries_common.h"
 
-int JsonEntriesParse(const char* jsonresponse,
-                            WBoAuthCred* wbc);
+WBEntry* JsonGetEntries(const char* jsonresponse);
 
 #endif//JSON_PARSE_H_INCLUDED
 

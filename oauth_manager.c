@@ -47,6 +47,6 @@ void WBoAuth2Print(const WBoAuth2Struct* wbo) {
 }
 
 int WBoAuth2StringSet(const char* content, size_t contentsize,
-                             char** wbofield) {
+                      char** wbofield) {
     return StoreContent(content, contentsize, wbofield);
 }

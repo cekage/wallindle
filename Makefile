@@ -10,7 +10,7 @@ CFLAGS=-O0 -g -m64 -std=iso9899:1999 -pedantic -Wall -Wshadow -Wpointer-arith -W
 
 ARM_CFLAGS=-mfpu=vfp -mfloat-abi=softfp -mtune=cortex-a8 -march=armv7-a
 
-LDFLAGS=lib/curl_x86_64/lib/libcurl.a -DCURL_STATICLIB -Ilib/curl_x86_64/include
+LDFLAGS=lib/curl_x86_64/lib/libcurl.a -DCURL_STATICLIB -Ilib/curl_x86_64/include -lm
 
 EXEC=wallindle
 
@@ -45,8 +45,8 @@ arm:
 	$(eval CC := arm-linux-gnueabi-gcc)
 	$(eval CFLAGS := -O0 -std=iso9899:1999  )
 	$(eval LDFLAGS := -Ilib/curl_src/include/)
-	$(eval LDFLAGS := -DCURL_STATICLIB -I./lib/curl_arm_32/include)
-	$(CC) $(CFLAGS) $(ARM_CFLAGS) wallindle.c -o $(EXEC) lib/curl_arm_32/lib/libcurl.a -lrt -DCURL_STATICLIB -Ilib/curl_arm_32/include
+	$(eval LDFLAGS := lib/curl_arm_32/lib/libcurl.a -lrt -DCURL_STATICLIB -Ilib/curl_arm_32/include -lm)
+	$(CC) $(CFLAGS) $(ARM_CFLAGS) wallindle.c  $(OTHERC) -o $(EXEC) $(LDFLAGS)
 
 codewarnings:
 #	clang-tidy wallindle.c -header-filter=.* -checks=*,clang-analyzer-*,-clang-analyzer-cplusplus* -- -std=iso9899:1999

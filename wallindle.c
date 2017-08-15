@@ -10,69 +10,12 @@
 #include "json_entries_parse.h"
 #include "configmanager.h"
 #include "entries_parse.h"
+#include "perform_entries.h"
 #include "entries_common.h"
 
 #include "shared.h"
 
-WBoAuthCred a_wbc;
-
-void PerformAuth(void );
-void PerformReal(void );
-void PerformDummy(void );
-void FetchEntries(void );
 void UpdateKindleCatalog(void );
-
-void PerformAuth(void ) {
-    char* url;
-    MemoryStruct jsonresponse;
-
-    WBConfigGet(&a_wbc);
-    WBConfigPrint(&a_wbc);
-
-    url = WBConfigForgeoAuthURL(&a_wbc);
-    jsonresponse.memory = malloc(1);
-    jsonresponse.size = 0;
-
-    GetJSON(url, &jsonresponse);
-    free(url);
-
-    printf("\nLa réponse json est:%s\n", jsonresponse.memory);
-    a_wbc.token = ExtractToken(jsonresponse.memory);
-    WBConfigPrint(&a_wbc);
-
-    free(jsonresponse.memory);
-}
-
-void FetchEntries(void ) {
-    char* url;
-    MemoryStruct jsonresponse;
-
-    url = WBEntryFetchingURL(&a_wbc);
-    jsonresponse = (MemoryStruct) {calloc(1, sizeof(char)), 0};
-
-//TODO(k)return achar*
-    GetJSON(url, &jsonresponse);
-    free(url);
-
-    printf("\nLa réponse json est:\n**** DEBUT %s \n****FIN\n",
-           jsonresponse.memory);
-    WBReadDownloadedJsonEntries(jsonresponse.memory, &a_wbc);
-    free(jsonresponse.memory);
-}
-
-void PerformDummy(void ) {
-    StoreContent("wallabag.thouzard.fr", 30, &a_wbc.wallabag_host);
-    StoreContent("NjkwMGYyNTQ0ZWEyMzM1MGFlNGM5MWVkYzY3NTJkNDE5NjExOWIxYjAxODZkMDNlYWU0MDRjNmI3YjI0NmFkZg",
-                 100, &a_wbc.token);
-//WBReadJsonEntries(&a_wbc);
-    FetchEntries();
-}
-
-void PerformReal(void ) {
-    PerformAuth();
-    FetchEntries();
-//WBReadDownloadedJsonEntries()
-}
 
 void UpdateKindleCatalog(void ) {
     pid_t pid = fork();
@@ -91,9 +34,53 @@ void UpdateKindleCatalog(void ) {
 }
 
 int main(void ) {
+    WBoAuthCred a_wbc;
     WBConfigInit(&a_wbc);
-    PerformReal();
-//PerformDummy();
+    int retourWD = WBConfigGet(&a_wbc);
+
+    char* oauthurl;
+    oauthurl = WBConfigForgeoAuthURL(&a_wbc);
+
+    MemoryStruct authjsonresponse = (MemoryStruct) {.memory = malloc(1), .size = 0};
+    GetJSON(oauthurl, &authjsonresponse);
+    free(oauthurl);
+
+    a_wbc.token = ExtractToken(authjsonresponse.memory);
+    free(authjsonresponse.memory);
+
+    char* getentriesurl;
+    getentriesurl = WBEntryFetchingURL(&a_wbc);
+
+    MemoryStruct entriesjsonresponse = (MemoryStruct) {.memory = calloc(100, sizeof(char)), .size = 0};
+    GetJSON(getentriesurl, &entriesjsonresponse);
+    free(getentriesurl);
+
+    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
+
+    WBEntry* entries = JsonGetEntries(entriesjsonresponse.memory);
+    free(entriesjsonresponse.memory);
+
+    EnsureEbookDirExists();
+    for (int i = 0; i < MAXIMUM_ENTRIES; ++i) {
+        if (0 == entries[i].id) { break; }
+
+        _PrintEntry(&entries[i]);
+        char* filename = GetEntryFileName(&entries[i]);
+
+        if (!IsEbookAlreadyDownloaded(filename)) {
+            char* ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
+            printf("ebookurl = %s\n", ebookurl);
+            GetEbook(ebookurl, filename);
+            free(ebookurl);
+        } else {
+            printf("%s already downloaded !\n", filename);
+        }
+
+        free(filename);
+        free(entries[i].created_at);
+    }
+
+    free(entries);
     WBConfigCleanup(&a_wbc);
 
     UpdateKindleCatalog();

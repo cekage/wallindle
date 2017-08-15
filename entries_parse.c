@@ -10,16 +10,25 @@
 #include "entries_parse.h"
 #include "json_common.h"
 
+static void WBReadJsonEntries(const char* filename);
 
-void  WBReadJsonEntries(WBoAuthCred* wbc, const char* filename) {
+static void WBReadJsonEntries(const char* filename) {
     char* jsoncontent = WBReadConfigFile(filename);
-    WBReadDownloadedJsonEntries(jsoncontent, wbc);
+    WBReadDownloadedJsonEntries(jsoncontent);
     free(jsoncontent);
 }
 
-void  WBReadDownloadedJsonEntries(const char* jsoncontent,
-                                  WBoAuthCred* wbc) {
+void WBReadDownloadedJsonEntries(const char* jsoncontent) {
     printf("--8<--snip--8<--\n%.*s\n--8<--snip--8<--\n", (int)MIN(50,
             strlen(jsoncontent)), jsoncontent);
-    JsonEntriesParse(jsoncontent, wbc);
+    WBEntry* entries = JsonGetEntries(jsoncontent);
+
+    // Clean all created_at string
+    for (int i = 0; i < MAXIMUM_ENTRIES; ++i) {
+        if (0 == entries[i].id) { break; }
+
+        free(entries[i].created_at);
+    }
+
+    free(entries);
 }

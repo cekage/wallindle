@@ -7,28 +7,29 @@
 
 #include <sys/param.h>
 
-
 #include <curl/curl.h>
 
 #include "http_request.h"
+#include "shared.h"
 
-size_t  WriteMemoryCallback(const char* contents,
-                            size_t  size,  size_t  nmemb, void* userp) {
+size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
+                            void* userp) {
     size_t realsize = size * nmemb;
-    MemoryStruct* mem = (MemoryStruct*) userp;
+    struct MemoryStruct* mem = (struct MemoryStruct*)userp;
+
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);
 
     if (mem->memory == NULL) {
-        /*outofmemory!*/
-        fprintf(stderr, "%s", "not enough memory (realloc returned NULL)\n");
+        /* out of memory! */
+        printf("not enough memory (realloc returned NULL)\n");
         return 0;
     }
 
     memcpy(&(mem->memory[mem->size]), contents, realsize);
-    mem->size = realsize;
+    mem->size += realsize;
     mem->memory[mem->size] = 0;
+
     return realsize;
-//    return size * nmemb;
 }
 
 int GetJSON(const char* url, MemoryStruct* jsonresponse) {
@@ -60,11 +61,14 @@ int GetJSON(const char* url, MemoryStruct* jsonresponse) {
     curl_easy_cleanup(curl_handle);
     /* we're done with libcurl, so clean it up*/
     curl_global_cleanup();
+
     return 0;
 }
 
 int GetEbook(const char* url, const char* filename) {
+
     printf("store content of \"%s\"\n--> to %s\n", url, filename);
+
     CURL* curl;
     FILE* fp;
     CURLcode res;
