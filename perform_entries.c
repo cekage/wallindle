@@ -52,7 +52,7 @@ bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
     return result;
 }
 
-bool  IsEbookAlreadyDownloaded(const char* ebookfile) {
+bool IsEbookAlreadyDownloaded(const char* ebookfile) {
     struct stat st;
     bool  result = false;
 

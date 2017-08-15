@@ -15,38 +15,39 @@
 
 #include "configmanager.h"
 
-static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
-static int _WBReadConfiguration(const char* filename,
-                                off_t filesize, char** filecontent);
-static void WBConfigPrint(const WBoAuthCred* wbc);
-static bool WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
+static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
+static wd_result _WBReadConfiguration(const char* filename,
+                                      off_t filesize, char** filecontent);
+static void _WBConfigPrint(const WBoAuthCred* wbc);
+static bool _WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
 
 
 off_t CheckConfSize(const char* filename, bool check_min_max) {
-    struct stat st;
+    struct stat fs_stat;
 
     off_t result;
 
-    if (stat(filename, &st) != 0) {
+    if (stat(filename, &fs_stat) != 0) {
         fprintf(stderr, "Cannot determine sizeof %s:%s\n", filename, strerror(errno));
-        result = WNDL_ERROR;
+        result = -1;
     }
 
-    else if (check_min_max && (MIN_CONFFILE_SIZE > st.st_size
-                               || MAX_CONFFILE_SIZE < st.st_size)) {
+    else if (check_min_max && (MIN_CONFFILE_SIZE > fs_stat.st_size
+                               || MAX_CONFFILE_SIZE < fs_stat.st_size)) {
         fprintf(stderr,
                 "Suspiscious size for %s : MIN_CONFFILE_SIZE=%d MAX_CONFFILE_SIZE=%d\n",
                 filename, MIN_CONFFILE_SIZE, MAX_CONFFILE_SIZE);
-        result = WNDL_ERROR;
+        result = -1;
     } else {
-        result = st.st_size;
+        result = fs_stat.st_size;
     }
 
     return result;
 }
 
-static int _WBReadConfiguration(const char* filename,
-                                off_t filesize, char** filecontent) {
+wd_result _WBReadConfiguration(const char* filename,
+                               off_t filesize, char** filecontent) {
+    size_t  totalread;
     FILE* f = fopen(filename, "r");
 
     if (NULL == f) {
@@ -54,8 +55,8 @@ static int _WBReadConfiguration(const char* filename,
         return WNDL_ERROR;
     }
 
-    const  size_t  totalread = fread(*filecontent, sizeof(char),
-                                     (size_t)filesize, f);
+    totalread = fread(*filecontent, sizeof(char),
+                      (size_t)filesize, f);
     fclose(f);
 
     if ( sizeof(char) > totalread) {
@@ -67,11 +68,11 @@ static int _WBReadConfiguration(const char* filename,
     return WNDL_OK;
 }
 
-int WBConfigGet(WBoAuthCred* wbcred) {
+wd_result WBConfigGet(WBoAuthCred* wbcred) {
     return _WBConfigGet(wbcred, DEFAULT_CONFIG_FILE);
 }
 
-static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
+static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     const char* delim = " ";
 
     off_t filesize;
@@ -81,13 +82,12 @@ static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
 
     filesize = CheckConfSize(cfg_filename, true);
 
-    if (WNDL_ERROR == filesize) {
+    if (-1 == filesize) {
         return WNDL_ERROR;
     }
 
 
-    filecontent = calloc((unsigned long)filesize + 1UL,
-                         sizeof(char));
+    filecontent = calloc((filesize + 1UL), sizeof(char));
 
     if (NULL == filecontent) {
         return WNDL_ERROR;
@@ -166,17 +166,17 @@ static int _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
 }
 
 // TODO(k) Assign default null values : https://stackoverflow.com/a/749690
-int WBConfigInit(WBoAuthCred* wbc) {
+wd_result WBConfigInit(WBoAuthCred* wbc) {
 #define CHECKFIELD(FD) result &= (NULL!=wbc->FD);
 #define INITFIELD(FD) wbc->FD=calloc(1, sizeof(char)); CHECKFIELD(FD)
-    bool  result = WNDL_OK;
+    bool result = true;
     INITFIELD(wallabag_host);
     INITFIELD(client_id);
     INITFIELD(client_secret);
     INITFIELD(username);
     INITFIELD(password);
     INITFIELD(token);
-    return result;
+    return result ? WNDL_OK : WNDL_ERROR ;
 #undef  INITFIELD
 #undef  CHECKFIELD
 }
@@ -197,16 +197,7 @@ int WBConfigStringSet(const char* content,  size_t  contentsize,
     return StoreContent(content, contentsize, wbcfield);
 }
 
-static void WBConfigPrint(const WBoAuthCred* wbc) {
-#define PRINTFIELD(FD) printf("wbc->%s(%"PRIuPTR"o.)=%s\n",#FD,strlen(wbc->FD),wbc->FD)
-    PRINTFIELD(wallabag_host);
-    PRINTFIELD(client_id);
-    PRINTFIELD(client_secret);
-    PRINTFIELD(username);
-    PRINTFIELD(password);
-    PRINTFIELD(token);
-#undef  PRINTFIELD
-}
+
 
 
 char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
@@ -219,11 +210,25 @@ char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
                                 + strlen(wbc->password)
                               ) * sizeof(char);
     char* url = calloc(url_size + 1, sizeof(char));
-    snprintf(url, url_size, AUTH_URL_MASK, wbc->wallabag_host, wbc->client_id, wbc->client_secret, wbc->username, wbc->password);
+
+    if (NULL != url)
+    { snprintf(url, url_size, AUTH_URL_MASK, wbc->wallabag_host, wbc->client_id, wbc->client_secret, wbc->username, wbc->password); }
+
     return url;
 }
 
-static bool WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2) {
+static void _WBConfigPrint(const WBoAuthCred* wbc) {
+#define PRINTFIELD(FD) printf("wbc->%s(%"PRIuPTR"o.)=%s\n",#FD,strlen(wbc->FD),wbc->FD)
+    PRINTFIELD(wallabag_host);
+    PRINTFIELD(client_id);
+    PRINTFIELD(client_secret);
+    PRINTFIELD(username);
+    PRINTFIELD(password);
+    PRINTFIELD(token);
+#undef  PRINTFIELD
+}
+
+static bool _WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2) {
 #define CHECKFIELD(FD) result &=(0==strcmp(wb1->FD,wb2->FD))
     bool  result = true;
     CHECKFIELD(wallabag_host);

@@ -10,9 +10,7 @@
 #include "entries_parse.h"
 #include "json_common.h"
 
-static void WBReadJsonEntries(const char* filename);
-
-static void WBReadJsonEntries(const char* filename) {
+static void _WBReadJsonEntries(const char* filename) {
     char* jsoncontent = WBReadConfigFile(filename);
     WBReadDownloadedJsonEntries(jsoncontent);
     free(jsoncontent);

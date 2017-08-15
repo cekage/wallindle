@@ -3,6 +3,8 @@
 #ifndef HTTP_REQUEST_H
 #define HTTP_REQUEST_H
 
+#include "shared.h"
+
 typedef struct MemoryStruct {
     char* memory;
     size_t size;
@@ -11,8 +13,8 @@ typedef struct MemoryStruct {
 size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
                             void* userp);
 
-int GetJSON(const char* url, MemoryStruct* jsonresponse);
+wd_result GetJSON(const char* url, MemoryStruct* jsonresponse);
 
-int GetEbook(const char* url, const char* filename);
+wd_result GetEbook(const char* url, const char* filename);
 
 #endif/*HTTP_REQUEST_H*/

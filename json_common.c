@@ -14,19 +14,11 @@
 
 #include "json_common.h"
 
-int JsonEquivTo(const char* json, const jsmntok_t* tok,  const char* s) {
-//    int result;
-//
-//    if (tok->type == JSMN_STRING
-//            && (int)strlen(s) == (tok->end - tok->start)
-//            && strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-//        result = WNDL_OK;
-//    } else {
-//        result = WNDL_ERROR;
-//    }
-//
-//    return result;
-    int result;
+static char* _WBReadFile(const char* filename, bool isConfig);
+
+wd_result _JsonEquivTo(const char* json, const jsmntok_t*
+                       tok, const char* s) {
+    bool result;
 
     result = (tok->type == JSMN_STRING);
     result &= ((int)strlen(s) == (tok->end - tok->start));
@@ -49,8 +41,7 @@ char* WBReadoAuthJsonFile(const char* filename) {
     return _WBReadFile(filename, true);
 }
 
-char* _WBReadFile(const char*
-                  filename, bool check_size) {
+static char* _WBReadFile(const char* filename, bool isConfig) {
     FILE* f = fopen(filename, "r");
 
     if (NULL == f) {
@@ -58,7 +49,7 @@ char* _WBReadFile(const char*
         return NULL;
     }
 
-    const off_t filesize = CheckConfSize(filename, check_size);
+    const off_t filesize = CheckConfSize(filename, isConfig);
     char* filecontent = calloc((unsigned long)filesize + 1UL, sizeof(char));
 
     if (NULL == filecontent) {

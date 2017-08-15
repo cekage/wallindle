@@ -32,8 +32,10 @@ static int _GetTokenCount(const char* jsonresponse) {
     return token_count;
 }
 
-static jsmntok_t* _AllocateTokens(const char* jsoncontent, int count) {
-    jsmntok_t* tokens = calloc(count * 10, sizeof(jsmntok_t));
+static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count) {
+//    jsmntok_t* tokens = calloc(count * 10, sizeof(jsmntok_t));
+
+    jsmntok_t* tokens = calloc(count + 1, sizeof(jsmntok_t));
 
     if (NULL == tokens) { return NULL; }
 
@@ -43,7 +45,7 @@ static jsmntok_t* _AllocateTokens(const char* jsoncontent, int count) {
     int token_count = jsmn_parse(&parser, jsoncontent, strlen(jsoncontent),
                                  tokens, count);
 
-    if (count != token_count) {
+    if ((0 > token_count) || ((int) count != token_count)) {
         free(tokens);
         tokens = NULL;
     }
@@ -59,8 +61,8 @@ static int _GetJsonKeyPosition(const char* jsoncontent, const jsmntok_t* tokens,
 
     do {
         // Check key exists
-        is_key_present = (JsonEquivTo(jsoncontent, &tokens[index],
-                                      key) == 0);
+        is_key_present = (_JsonEquivTo(jsoncontent, &tokens[index],
+                                       key) == 0);
         // and if next item
         ++index;
         // is a tokentype
@@ -204,7 +206,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 //                    tokens[index].end - tokens[index].start),
 //                   jsonresponse + tokens[index].start);
 
-            if (JsonEquivTo(jsonresponse, &tokens[index], "id") == 0) {
+            if (_JsonEquivTo(jsonresponse, &tokens[index], "id") == 0) {
                 char* value = NULL;
                 NEXT_ITEM;
                 StoreContent(jsonresponse + tokens[index].start,
@@ -213,7 +215,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
                 free(value);
                 NEXT_ITEM;
                 continue;
-            } else if (JsonEquivTo(jsonresponse, &tokens[index], "created_at") == 0) {
+            } else if (_JsonEquivTo(jsonresponse, &tokens[index], "created_at") == 0) {
                 NEXT_ITEM;
                 StoreContent(jsonresponse + tokens[index].start,
                              tokens[index].end - tokens[index].start,

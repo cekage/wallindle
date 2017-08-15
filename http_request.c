@@ -32,7 +32,7 @@ size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
     return realsize;
 }
 
-int GetJSON(const char* url, MemoryStruct* jsonresponse) {
+wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
     CURL* curl_handle;
     CURLcode res;
     curl_global_init(CURL_GLOBAL_ALL);
@@ -55,6 +55,7 @@ int GetJSON(const char* url, MemoryStruct* jsonresponse) {
     /* check for error s*/
     if (res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return WNDL_ERROR;
     }
 
     /* clean up curl stuff*/
@@ -62,10 +63,10 @@ int GetJSON(const char* url, MemoryStruct* jsonresponse) {
     /* we're done with libcurl, so clean it up*/
     curl_global_cleanup();
 
-    return 0;
+    return WNDL_OK;
 }
 
-int GetEbook(const char* url, const char* filename) {
+wd_result GetEbook(const char* url, const char* filename) {
 
     printf("store content of \"%s\"\n--> to %s\n", url, filename);
 
@@ -73,8 +74,9 @@ int GetEbook(const char* url, const char* filename) {
     FILE* fp;
     CURLcode res;
     curl = curl_easy_init();
+    bool isfetched = true;
 
-    if (curl) {
+    if (NULL != curl) {
         fp = fopen(filename, "wb");
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
@@ -84,14 +86,16 @@ int GetEbook(const char* url, const char* filename) {
 
         res = curl_easy_perform(curl);
 
-        if (res != CURLE_OK) {
+        if (CURLE_OK == res) {
+            isfetched = true;
+        } else {
             fprintf(stderr, "curl_easy_perform() failed : %s\n", curl_easy_strerror(res));
-            exit(1);
+            isfetched = false;
         }
 
         curl_easy_cleanup(curl);
         fclose(fp);
     }
 
-    return 0;
+    return isfetched ? WNDL_OK : WNDL_ERROR;
 }

@@ -50,4 +50,5 @@ arm:
 
 codewarnings:
 #	clang-tidy wallindle.c -header-filter=.* -checks=*,clang-analyzer-*,-clang-analyzer-cplusplus* -- -std=iso9899:1999
-	clang-tidy wallindle.c -header-filter=.* -checks=*,clang-analyzer-*,-clang-analyzer-cplusplus*,-llvm-header-guard,-llvm-include-order -- -std=iso9899:1999
+#	clang-tidy wallindle.c $(OTHERC) -header-filter=.* -checks=*,-clang-analyzer-alpha.unix.Stream,-clang-analyzer-cplusplus*,llvm-header-guard,llvm-include-order --  -std=iso9899:1999 -lm
+	clang-tidy wallindle.c $(OTHERC) -header-filter=.* -checks=*,-*,llvm-include-order --  -std=iso9899:1999 -lm

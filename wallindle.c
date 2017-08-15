@@ -1,4 +1,6 @@
 #include <unistd.h>
+
+#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <stdio.h>
@@ -6,78 +8,127 @@
 #include <string.h>
 
 #include "http_request.h"
-#include "json_oauth_parse.h"
 #include "json_entries_parse.h"
 #include "configmanager.h"
 #include "entries_parse.h"
 #include "perform_entries.h"
 #include "entries_common.h"
+#include "json_oauth_parse.h"
 
 #include "shared.h"
 
-void UpdateKindleCatalog(void );
+static void UpdateKindleCatalog(void );
 
-void UpdateKindleCatalog(void ) {
-    pid_t pid = fork();
+static void UpdateKindleCatalog(void ) {
+    __pid_t pid = fork();
 
     if (pid == -1) {
         fprintf(stderr, "Can't fork\n");
     } else if (pid > 0) {
         int status;
-        waitpid(pid, &status, 0);
+
+        if (-1 == waitpid(pid, &status, 0)) {
+            printf("Error for waitpid :(\n");
+        }
     } else {
+        /*@null@*/
         char* command = DBUS_CMD;
         char* arguments[] = {"", DBUS_ARGS, NULL};
-        execvp(command, arguments);
-        _exit(EXIT_FAILURE);
+
+        if (-1 == execvp(command, arguments)) {
+            printf("Error for execvp :(\n");
+        }
+
+        exit(EXIT_FAILURE);
     }
 }
 
 int main(void ) {
-    WBoAuthCred a_wbc;
-    WBConfigInit(&a_wbc);
-    int retourWD = WBConfigGet(&a_wbc);
-
     char* oauthurl;
+    char* getentriesurl;
+    char* filename;
+    char* ebookurl;
+    WBEntry* entries;
+    int i;
+
+    MemoryStruct entriesjsonresponse = (MemoryStruct) {NULL, 0};
+    WBoAuthCred a_wbc = (WBoAuthCred) {NULL, NULL, NULL, NULL, NULL, NULL};
+    MemoryStruct authjsonresponse = (MemoryStruct) {NULL, 0};
+
+    if (WNDL_ERROR == WBConfigInit(&a_wbc)) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (WNDL_ERROR == WBConfigGet(&a_wbc)) {
+        exit(EXIT_FAILURE);
+    }
+
     oauthurl = WBConfigForgeoAuthURL(&a_wbc);
 
-    MemoryStruct authjsonresponse = (MemoryStruct) {.memory = malloc(1), .size = 0};
-    GetJSON(oauthurl, &authjsonresponse);
+    if (NULL == oauthurl) {
+        exit(EXIT_FAILURE);
+    }
+
+//    authjsonresponse.memory = NULL;
+//    authjsonresponse.size = 0;
+
+
+    if (WNDL_ERROR == GetJSON(oauthurl, &authjsonresponse)) {
+        free(oauthurl); // Avoiding valgrind warnings
+        exit(EXIT_FAILURE);
+    }
+
     free(oauthurl);
 
     a_wbc.token = ExtractToken(authjsonresponse.memory);
+
+    if (NULL == a_wbc.token) {
+        WBConfigCleanup(&a_wbc);
+        free(authjsonresponse.memory);
+        exit(EXIT_FAILURE);
+    }
+
     free(authjsonresponse.memory);
 
-    char* getentriesurl;
     getentriesurl = WBEntryFetchingURL(&a_wbc);
 
-    MemoryStruct entriesjsonresponse = (MemoryStruct) {.memory = calloc(100, sizeof(char)), .size = 0};
-    GetJSON(getentriesurl, &entriesjsonresponse);
+    if (WNDL_ERROR == GetJSON(getentriesurl, &entriesjsonresponse)) {
+        free(getentriesurl); // Avoiding valgrind warnings
+        exit(EXIT_FAILURE);
+    }
+
     free(getentriesurl);
 
     printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
 
-    WBEntry* entries = JsonGetEntries(entriesjsonresponse.memory);
+    entries = JsonGetEntries(entriesjsonresponse.memory);
     free(entriesjsonresponse.memory);
 
     EnsureEbookDirExists();
-    for (int i = 0; i < MAXIMUM_ENTRIES; ++i) {
-        if (0 == entries[i].id) { break; }
+
+    for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
 
         _PrintEntry(&entries[i]);
-        char* filename = GetEntryFileName(&entries[i]);
+        filename = GetEntryFileName(&entries[i]);
 
         if (!IsEbookAlreadyDownloaded(filename)) {
-            char* ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
-            printf("ebookurl = %s\n", ebookurl);
-            GetEbook(ebookurl, filename);
+            ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
+
+            if (WNDL_ERROR == GetEbook(ebookurl, filename)) {
+                printf("fetching %s failed\n", ebookurl);
+            };
+
             free(ebookurl);
+
+            ebookurl = NULL;
         } else {
             printf("%s already downloaded !\n", filename);
         }
 
         free(filename);
+        filename = NULL;
         free(entries[i].created_at);
+        entries[i].created_at = NULL;
     }
 
     free(entries);

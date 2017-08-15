@@ -11,16 +11,16 @@
 
 
 // TODO(k)Assigndefaultnullvalueshttps://stackoverflow.com/a/749690
-int WBoAuth2Init(WBoAuth2Struct* wbo) {
+wd_result WBoAuth2Init(WBoAuth2Struct* wbo) {
 #define CHECKFIELD(FD) result &= (NULL != wbo->FD);
 #define INITFIELD(FD) wbo->FD = calloc(1, sizeof(char));CHECKFIELD(FD)
-    bool result = WNDL_OK;
+    bool result = true;
     INITFIELD(access_token);
     INITFIELD(refresh_token);
     INITFIELD(scope);
     INITFIELD(token_type);
     wbo->expires_in = 0;
-    return result;
+    return result ? WNDL_OK : WNDL_ERROR;
 #undef INITFIELD
 #undef CHECKFIELD
 }

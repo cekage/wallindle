@@ -12,8 +12,8 @@
 //TODO(k)ugly!
 #define MAX_INT_STRLEN (sizeof("4294967295"))
 
-#define WNDL_ERROR (-1)
-#define WNDL_OK (0)
+//#define WNDL_ERROR (-1)
+//#define WNDL_OK (0)
 
 #define LIMIT_DYNAMIC_STRING (4096)
 
@@ -41,11 +41,12 @@
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 
 // TODO(k) replace #define WNDL_OK
-//typedef enum {WNDL_OK, WNDL_ERROR} wd_result;
+typedef enum {WNDL_OK, WNDL_ERROR} wd_result;
 
-typedef enum {false, true} bool;
+#include <stdbool.h>
+//typedef enum {false, true} bool;
 
-int StoreContent(const char* src, size_t contentsize, char** dest);
+wd_result StoreContent(const char* src, size_t contentsize, char** dest);
 
-void EnsureEbookDirExists();
+void EnsureEbookDirExists(void);
 #endif//SHARED_H_INCLUDED

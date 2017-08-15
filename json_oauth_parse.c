@@ -31,7 +31,9 @@ char* ExtractToken(const char* jsonresponse) {
         // TODO(k) fprintf!
         printf("Failed to parse JSON: %d\n", result);
         return NULL;
-    } else if (result < 1 || tokens[0].type != JSMN_OBJECT) {
+    }
+
+    if (result < 1 || tokens[0].type != JSMN_OBJECT) {
         // TODO(k) fprintf!
         printf("Object expected\n");
         return NULL;
@@ -39,7 +41,7 @@ char* ExtractToken(const char* jsonresponse) {
 
     /* Loop over all keys of the root object */
     for (int index = 1; index < result; index++) {
-        if (JsonEquivTo(jsonresponse, &tokens[index], "access_token") == 0) {
+        if (_JsonEquivTo(jsonresponse, &tokens[index], "access_token") == 0) {
             NEXT_ITEM;
             /* We may use strndup() to fetch string value */
             const  size_t  stringlength = (size_t)(tokens[index].end - tokens[index].start);

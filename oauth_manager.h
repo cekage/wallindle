@@ -19,10 +19,8 @@ typedef struct WBoAuth2Struct {
 
 } WBoAuth2Struct;
 
-int WBoAuth2Init(WBoAuth2Struct* wbo);
-
+wd_result WBoAuth2Init(WBoAuth2Struct* wbo);
 void WBoAuth2Cleanup(WBoAuth2Struct* wbo);
-
 void WBoAuth2Print(const WBoAuth2Struct* wbo);
 
 int WBoAuth2StringSet(const char* content,
