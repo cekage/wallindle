@@ -7,7 +7,7 @@
 #define DBUS_CMD "/bin/echo"
 #endif
 
-#define DBUS_ARGS "--system/defaultcom.lab126.powerd.resumingint32:1"
+#define DBUS_ARGS "--system","/default","com.lab126.powerd.resuming","int32:1"
 
 //TODO(k)ugly!
 #define MAX_INT_STRLEN (sizeof("4294967295"))
@@ -36,7 +36,7 @@
 #define SMAXIMUM_ENTRIES "500"
 
 #define DOWNLOAD_URL_MASK "http://%s/api/entries/%lu/export." FORMAT_EXPORT "?access_token=%s"
-#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&saince=%d&sort=created"
+#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d&sort=created"
 
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 

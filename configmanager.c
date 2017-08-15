@@ -1,18 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-
 #include <errno.h>
-
-
 #include <inttypes.h>
+
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include "shared.h"
-
 #include "configmanager.h"
 
 static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);

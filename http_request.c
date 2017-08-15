@@ -68,7 +68,7 @@ wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
 
 wd_result GetEbook(const char* url, const char* filename) {
 
-    printf("store content of \"%s\"\n--> to %s\n", url, filename);
+//    printf("store content of \"%s\"\n--> to %s\n", url, filename);
 
     CURL* curl;
     FILE* fp;

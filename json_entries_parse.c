@@ -119,8 +119,8 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
         return NULL;
     }
 
-    printf("pages primitive found @ index = %d ---> %.*s\n", index, 20,
-           jsonresponse + tokens[index].start);
+//    printf("pages primitive found @ index = %d ---> %.*s\n", index, 20,
+//           jsonresponse + tokens[index].start);
 
     /*
      * Searching total
@@ -129,13 +129,13 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
                                 "total", JSMN_PRIMITIVE, index);
 
     if (index == token_count) {
-        printf("total primitive expected\n");
+//        printf("total primitive expected\n");
 //        free(tokens);
         return NULL;
     }
 
-    printf("total primitive found @ index = %d ---> %.*s\n", index, 20,
-           jsonresponse + tokens[index].start);
+//    printf("total primitive found @ index = %d ---> %.*s\n", index, 20,
+//           jsonresponse + tokens[index].start);
     char* str_max_entries = NULL;
     StoreContent(jsonresponse + tokens[index].start,
                  MIN(tokens[index].end - tokens[index].start, 4),
@@ -163,8 +163,8 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
         return NULL;
     }
 
-    printf("_embedded object found @ index = %d ---> %.*s\n", index, 20,
-           jsonresponse + tokens[index].start);
+//    printf("_embedded object found @ index = %d ---> %.*s\n", index, 20,
+//           jsonresponse + tokens[index].start);
 
     index = _GetJsonKeyPosition(jsonresponse, tokens, token_count,
                                 "items", JSMN_ARRAY, index);
@@ -175,20 +175,20 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
         return NULL;
     }
 
-    printf("items array found @ index = %d ---> %.*s\n", index, 20,
-           jsonresponse + tokens[index].start);
+//    printf("items array found @ index = %d ---> %.*s\n", index, 20,
+//           jsonresponse + tokens[index].start);
 
 //   WBEntry entries[max_entries + 1];
     WBEntry* entries = calloc(max_entries + 1, sizeof(WBEntry));
 
-    printf(" adding true\n");
+//    printf(" adding true\n");
 
-    printf("@index = %d ---> %.*s\n", index, 20,
-           jsonresponse + tokens[index].start);
+//    printf("@index = %d ---> %.*s\n", index, 20,
+//           jsonresponse + tokens[index].start);
     NEXT_ITEM;
     NEXT_ITEM;
 
-    printf("DO ! \n");
+//    printf("DO ! \n");
     unsigned int entry_index = 0;
 
     do { // new entry

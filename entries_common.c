@@ -10,7 +10,7 @@
 #include "entries_common.h"
 
 char* WBEntryFetchingURL(WBoAuthCred* wbc) {
-    const int last_week_in_utc = time(NULL) - 70 * 24 * 60;
+    const int last_week_in_utc = time(NULL) - 7 * 24 * 60;
 
 // TODO(k) Check real size
     const  size_t  url_size = ( sizeof(FETCH_ENTRIES_MASK) - 1 //themasksize1
@@ -19,12 +19,12 @@ char* WBEntryFetchingURL(WBoAuthCred* wbc) {
                                 + strlen(wbc->wallabag_host)
                                 + strlen(wbc->token) + 1
                               ) * sizeof(char);
-    printf("url_size=%" PRIuPTR, url_size);
+//    printf("url_size=%" PRIuPTR, url_size);
 
     char* url = calloc(url_size  + 1, sizeof(char));
-    printf("\nAvant: %" PRIuPTR "%s\n", url_size, url);
+//    printf("\nAvant: %" PRIuPTR "%s\n", url_size, url);
     snprintf(url, url_size, FETCH_ENTRIES_MASK,
              wbc->wallabag_host, wbc->token, last_week_in_utc);
-    printf("\nAprès: %" PRIuPTR "%s\n", url_size, url);
+//    printf("\nAprès: %" PRIuPTR "%s\n", url_size, url);
     return url;
 }

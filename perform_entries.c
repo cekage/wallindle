@@ -67,13 +67,13 @@ void  PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred) {
     EnsureEbookDirExists();
 
     char* filename = GetEntryFileName(wbe);
-    printf("Filename for wbe (entry%lu) = %s\n", wbe->id, filename);
+//    printf("Filename for wbe (entry%lu) = %s\n", wbe->id, filename);
     const bool  is_already_downloaded = IsEntriesAlreadyDownloaded(wbe);
-    printf("is_already_downloaded=%s\n", is_already_downloaded ? "true" : "false");
+//    printf("is_already_downloaded=%s\n", is_already_downloaded ? "true" : "false");
 
     if (!is_already_downloaded) {
         char* url = WBConfigForgeDownloadURL(wbe, wbcred);
-        printf("url=%s\n", url);
+//        printf("url=%s\n", url);
         GetEbook(url, filename);
         free(url);
     }

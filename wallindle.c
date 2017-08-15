@@ -33,7 +33,7 @@ static void UpdateKindleCatalog(void ) {
     } else {
         /*@null@*/
         char* command = DBUS_CMD;
-        char* arguments[] = {"", DBUS_ARGS, NULL};
+        char* arguments[] = {DBUS_CMD, DBUS_ARGS, NULL};
 
         if (-1 == execvp(command, arguments)) {
             printf("Error for execvp :(\n");
@@ -99,16 +99,19 @@ int main(void ) {
 
     free(getentriesurl);
 
-    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
+//    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
 
     entries = JsonGetEntries(entriesjsonresponse.memory);
     free(entriesjsonresponse.memory);
 
+    if (NULL != entries) {
     EnsureEbookDirExists();
+
+
 
     for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
 
-        _PrintEntry(&entries[i]);
+//        _PrintEntry(&entries[i]);
         filename = GetEntryFileName(&entries[i]);
 
         if (!IsEbookAlreadyDownloaded(filename)) {
@@ -122,7 +125,7 @@ int main(void ) {
 
             ebookurl = NULL;
         } else {
-            printf("%s already downloaded !\n", filename);
+//            printf("%s already downloaded !\n", filename);
         }
 
         free(filename);
@@ -132,9 +135,11 @@ int main(void ) {
     }
 
     free(entries);
+    UpdateKindleCatalog();
+    }
     WBConfigCleanup(&a_wbc);
 
-    UpdateKindleCatalog();
-    printf("MischiefManaged!\n");
+
+    printf("\nMischiefManaged!\n");
     return 0;
 }
