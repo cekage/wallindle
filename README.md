@@ -18,7 +18,7 @@ allows your e-ink kindle fetching saved articles autonomously !
 If you don't undestand instructions, please do not attempt a jailbreak.
 
 - A Wallabag account (either your own instance or
-[a official one](https://www.wallabag.it/) with some recent articles !
+[a official one](https://www.wallabag.it/)) with some recent articles !
 
 # Remerciements :
 
@@ -32,7 +32,7 @@ If you don't undestand instructions, please do not attempt a jailbreak.
 # Running Wallindle
 ## Building binary
 
-- You need a "arm-linux-gnueabi-gcc" compiler. You can easily find one in your
+- You need a "arm-linux-gnueabi" compiler. You can easily find one in your
 linux distro repository.
 
 If you are a "Gentoo Linux" user I strongly recommend you builduing your own
@@ -137,6 +137,9 @@ with it. Every files can be rw by owner and r by group and others.
 
 ## Bad idea #1 : running as root a non protected binary
 
+*Keep in mind, it's a really bad idea : this create a very serious security
+issue*
+
 1. Storing wallindle and wallindle.cfg on Documents
 2. Copy both from Documents to /tmp/
 3. Launch wallindle ( /mnt/base-us/documents/wallabag directory in hardcoded )
@@ -187,3 +190,12 @@ Restart cron agent :
 [root@kindle root]# pkill crond && /usr/sbin/crond -c /etc/crontab/
 ```
 
+Remember kids, this file will be run as root. Do you *really* want to transform
+your kindle in a piece of garbage ? I'm sure not.
+
+## Bad idea #2 : running as root a protected binary
+
+Same as the first bad idea except you don't store wallindle in
+/mnt/base-us/documents/ but elsewhere on the rom of the kindle. In this case
+nobody can alter the binary but do you really want to alter the rom file
+structure list ? 
