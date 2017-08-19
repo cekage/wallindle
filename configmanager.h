@@ -32,11 +32,7 @@ typedef struct WBoAuthCred {
 
 wd_result WBConfigGet(WBoAuthCred* wbcred);
 
-off_t CheckConfSize(const char* filename, bool check_min_max);
-
-
-int WBConfigStringSet(const char* content, size_t contentsize,
-                      char** wbcfield);
+off_t GetFileSize(const char* filename, bool check_min_max);
 
 wd_result WBConfigInit(WBoAuthCred* wbc);
 void WBConfigCleanup(WBoAuthCred* wbc);

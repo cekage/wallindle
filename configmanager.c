@@ -21,31 +21,33 @@
 #include <inttypes.h>
 
 #include <sys/param.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 
 #include "shared.h"
 #include "configmanager.h"
 
+#include <sys/stat.h>
+//
 static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename);
 static wd_result _WBReadConfiguration(const char* filename,
                                       off_t filesize, char** filecontent);
 static void _WBConfigPrint(const WBoAuthCred* wbc);
 static bool _WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
 
+static int WBConfigStringSet(const char* content, size_t  contentsize,
+                             char** wbcfield);
 
-off_t CheckConfSize(const char* filename, bool check_min_max) {
-    struct stat fs_stat;
+off_t GetFileSize(const char* filename, bool check_min_max) {
 
     off_t result;
+    struct stat fs_stat = {0};
+
 
     if (stat(filename, &fs_stat) != 0) {
         fprintf(stderr, "Cannot determine sizeof %s:%s\n", filename, strerror(errno));
         result = -1;
-    }
-
-    else if (check_min_max && (MIN_CONFFILE_SIZE > fs_stat.st_size
-                               || MAX_CONFFILE_SIZE < fs_stat.st_size)) {
+    } else if (check_min_max && (MIN_CONFFILE_SIZE > fs_stat.st_size
+                                 || MAX_CONFFILE_SIZE < fs_stat.st_size)) {
         fprintf(stderr,
                 "Suspiscious size for %s : MIN_CONFFILE_SIZE=%d MAX_CONFFILE_SIZE=%d\n",
                 filename, MIN_CONFFILE_SIZE, MAX_CONFFILE_SIZE);
@@ -84,97 +86,69 @@ wd_result WBConfigGet(WBoAuthCred* wbcred) {
     return _WBConfigGet(wbcred, DEFAULT_CONFIG_FILE);
 }
 
-static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
+static void _AuthFieldFoundAndSave(bool* proceed, char* src, char** dest,
+                                   const char* fieldname) {
     const char* delim = " ";
+    char* token;
+    bool result;
+
+    if (proceed) {
+        token = strtok(src, delim);
+        result = (NULL != token);
+
+        if (result) {
+            size_t  last_char_pos = strlen(token) - 1;
+
+            if (0x0A == token[last_char_pos]) {
+                token[last_char_pos] = 0;
+            }
+
+            WBConfigStringSet(token, strlen(token), dest);
+        } else {
+            fprintf(stderr, "Cannot determine field %s\n", fieldname);
+        }
+
+        *proceed = result;
+    }
+
+}
+
+static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
 
     off_t filesize;
     char* filecontent;
     int readresult;
-    char* token;
+    bool must_continue = true;
 
-    filesize = CheckConfSize(cfg_filename, true);
+
+    filesize = GetFileSize(cfg_filename, true);
 
     if (-1 == filesize) {
         return WNDL_ERROR;
     }
 
-
-    filecontent = calloc((filesize + 1UL), sizeof(char));
+    filecontent = calloc(filesize + 1UL, sizeof(char));
 
     if (NULL == filecontent) {
         return WNDL_ERROR;
     }
 
-    readresult = _WBReadConfiguration(cfg_filename, filesize, &filecontent);
+    if (must_continue) {
+        readresult = _WBReadConfiguration(cfg_filename, filesize, &filecontent);
+        must_continue = (WNDL_OK == readresult);
+        _AuthFieldFoundAndSave(&must_continue, filecontent, &wbcred->wallabag_host,
+                               "wallabag_host");
+        _AuthFieldFoundAndSave(&must_continue, NULL, &wbcred->client_id, "client_id");
+        _AuthFieldFoundAndSave(&must_continue, NULL, &wbcred->client_secret,
+                               "client_secret");
+        _AuthFieldFoundAndSave(&must_continue, NULL, &wbcred->username, "username");
+        _AuthFieldFoundAndSave(&must_continue, NULL, &wbcred->password, "password");
 
-    if (WNDL_ERROR == readresult) {
-        free(filecontent);
-        return WNDL_ERROR;
-    }
-
-    //printf("%"PRIuPTR"%s\n",filesize,filecontent);
-    //   WBConfigPrint(wbcred);
-
-    token = strtok(filecontent, delim);
-
-    if (NULL != token) {
-        WBConfigStringSet(token, strlen(token), &wbcred->wallabag_host);
-    } else {
-        fprintf(stderr, "Cannot determine field %s\n", "wallabag_host");
-        free(filecontent);
-        return WNDL_ERROR;
-    }
-
-    token = strtok(NULL, delim);
-
-    if (NULL != token) {
-        WBConfigStringSet(token, strlen(token), &wbcred->client_id);
-    } else {
-        fprintf(stderr, "Cannot determine field %s\n", "client_id");
-        free(filecontent);
-        return WNDL_ERROR;
-    }
-
-    token = strtok(NULL, delim);
-
-    if (NULL != token) {
-        WBConfigStringSet(token, strlen(token), &wbcred->client_secret);
-    } else {
-        fprintf(stderr, "Cannot determine field %s\n", "client_secret");
-        free(filecontent);
-        return WNDL_ERROR;
-    }
-
-    token = strtok(NULL, delim);
-
-    if (NULL != token) {
-        WBConfigStringSet(token, strlen(
-                              token), &wbcred->username);
-    } else {
-        fprintf(stderr, "Cannot determine field %s\n", "username");
-        free(filecontent);
-        return WNDL_ERROR;
-    }
-
-    token = strtok(NULL, delim);
-
-    if (NULL != token) {
-        size_t  last_char_pos = strlen(token) - 1;
-
-        if (0x0A == token[last_char_pos]) {
-            token[last_char_pos] = 0;
-        }
-
-        WBConfigStringSet(token, strlen(token), &wbcred->password);
-    } else {
-        fprintf(stderr, "Cannot determine field %s\n", "password");
-        free(filecontent);
-        return WNDL_ERROR;
     }
 
     free(filecontent);
-    //WBConfigPrint(wbcred);
-    return WNDL_OK;
+
+    return must_continue ? WNDL_OK : WNDL_ERROR;
 }
 
 // TODO(k) Assign default null values, avoid useless calloc();
@@ -204,27 +178,44 @@ void WBConfigCleanup(WBoAuthCred* wbc) {
 #undef  FREEFIELD
 }
 
-int WBConfigStringSet(const char* content, size_t  contentsize,
-                      char** wbcfield) {
+static int WBConfigStringSet(const char* content, size_t  contentsize,
+                             char** wbcfield) {
+
     return StoreContent(content, contentsize, wbcfield);
 }
 
-
-
-
 char* WBConfigForgeoAuthURL(WBoAuthCred* wbc) {
-    const  size_t  url_size = ( sizeof(AUTH_URL_MASK)
-                                - 5 * ( sizeof("%s") - 1)
-                                + strlen(wbc->wallabag_host)
-                                + strlen(wbc->client_id)
-                                + strlen(wbc->client_secret)
-                                + strlen(wbc->username)
-                                + strlen(wbc->password)
-                              ) * sizeof(char);
-    char* url = calloc(url_size + 1, sizeof(char));
 
-    if (NULL != url)
-    { snprintf(url, url_size, AUTH_URL_MASK, wbc->wallabag_host, wbc->client_id, wbc->client_secret, wbc->username, wbc->password); }
+    char* url;
+    size_t url_size;
+
+    // Calculate size of url using MASK minus 5* "%s"
+    // plus the length of wbs fields
+    url_size = ( sizeof(AUTH_URL_MASK) - 5 * ( sizeof("%s") - 1)
+                 + strlen(wbc->wallabag_host) + strlen(wbc->client_id)
+                 + strlen(wbc->client_secret) + strlen(wbc->username)
+                 + strlen(wbc->password)) * sizeof(char);
+
+    // Allocate with zeros
+    url = calloc(url_size + 1, sizeof(char));
+
+    if (NULL == url) {
+        // If fails, warns user on stderr
+        fprintf(stderr, "Cannot allocate oauth url\n");
+    } else {
+        // Store in "url" the mask and parameters
+        int sprinted = snprintf(url, url_size, AUTH_URL_MASK, wbc->wallabag_host,
+                                wbc->client_id, wbc->client_secret, wbc->username,
+                                wbc->password);
+
+        // Checking if snprintf works as expected (size > 1)
+        if (1 > sprinted) {
+            // If fails : warns, frees & nulls url
+            fprintf(stderr, "Cannot snprintf oauth url\n");
+            free(url);
+            url = NULL;
+        }
+    }
 
     return url;
 }
