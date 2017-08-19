@@ -28,38 +28,86 @@
 
 #include "perform_entries.h"
 
+static bool IsEntriesAlreadyDownloaded(const WBEntry* wbe);
+
 char* WBConfigForgeDownloadURL(const WBEntry* wbe,
                                const WBoAuthCred* wbcred) {
+    char* url;
+    int sprinted;
+
+    // Compute size needed to store downloading url from the MASK
+    // substracting % format and adding strings size
     const  size_t  url_size = ( sizeof(DOWNLOAD_URL_MASK)
                                 - (2 * (sizeof("%s") - 1) + (sizeof("%lu") - 1)) //minusformats
                                 + MAX_INT_STRLEN//plusmaxintsize
                                 + strlen(wbcred->wallabag_host)
                                 + strlen(wbcred->token)
                               ) * sizeof(char);
-    char* url = calloc(url_size + 1, sizeof(char));
-    snprintf(url, url_size, DOWNLOAD_URL_MASK, wbcred->wallabag_host, wbe->id,
-             wbcred->token);
+
+    // Usage of calloc maybe malloc is sufficient
+    url = calloc(url_size + 1, sizeof(char));
+
+    // Check if calloc fails
+    if (NULL == url) {
+        // In this case, error then quit function
+        fprintf(stderr, "Cannot allocate download url");
+        return NULL;
+    }
+
+    // build url with mask and fields but limit the size
+    sprinted = snprintf(url, url_size, DOWNLOAD_URL_MASK, wbcred->wallabag_host,
+                        wbe->id, wbcred->token);
+
+    // Check if a minimum size is really snprinted
+    if (1 > sprinted) {
+        // In this case, displays error, free url and quit
+        fprintf(stderr, "Cannot sprintf download url");
+        free(url);
+        return NULL;
+    }
+
+    // Return a pointer to URL, must be freed somewhere later !
     return url;
 }
 
 
 char* GetEntryFileName(const WBEntry* wbe) {
-    const  size_t  realsize = ( sizeof(ENTRY_MASK)
-                                - (sizeof("%08lx") - 1)
-                                + 8
-                              ) * sizeof(char);
-    char* result = calloc(realsize + 1, sizeof(char));
-    snprintf(result, realsize, ENTRY_MASK, wbe->id);
+    char* result;
+    size_t realsize;
+
+    // We need the length of ENTRY_MASK minus size of parameters
+    // and add 8 characters
+    realsize = (sizeof(ENTRY_MASK)
+                - (sizeof("%08lx") - 1)
+                + 8) * sizeof(char);
+
+    // Allocate result with "realsize+1" zeros
+    result = calloc(realsize + 1, sizeof(char));
+
+    if (NULL == result) {
+        fprintf(stderr, "Cannot calloc entry file name");
+    } else {
+        int sprinted = snprintf(result, realsize, ENTRY_MASK, wbe->id);
+
+        if (1 > sprinted) {
+            fprintf(stderr, "Cannot snprintf entry file name");
+            free(result);
+            result = NULL;
+        }
+    }
+
     return result;
 }
-
-bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
-    struct stat st;
-    bool  result;//=wbe->id>0;
+// TODO(k) 1/ Rename IsEbookAlreadyDownloaded 2/ use it on IsEntriesAlreadyDownloaded
+static bool IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
+    struct stat fs_stat = {0};
+    bool  result;
     char* filename = GetEntryFileName(wbe);
 
-    if (stat(filename, &st) == 0) {
-        result = (st.st_size > 0);
+    if (NULL == filename) {
+        result = false;
+    } else if (stat(filename, &fs_stat) == 0) {
+        result = (fs_stat.st_size > 0);
     } else {
         result = false;
     }
@@ -69,46 +117,36 @@ bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
 }
 
 bool IsEbookAlreadyDownloaded(const char* ebookfile) {
-    struct stat st;
+    struct stat fs_stat = {0};
     bool  result = false;
 
-    if (stat(ebookfile, &st) == 0) {
-        result = (st.st_size > 0);
+    if (stat(ebookfile, &fs_stat) == 0) {
+        result = (fs_stat.st_size > 0);
     }
 
     return result;
 }
 
-void  PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred) {
+static void _PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred) {
+
+    char* filename;
+    bool  is_already_downloaded;
     EnsureEbookDirExists();
 
-    char* filename = GetEntryFileName(wbe);
-    //    printf("Filename for wbe (entry%lu) = %s\n", wbe->id, filename);
-    const bool  is_already_downloaded = IsEntriesAlreadyDownloaded(wbe);
-    //    printf("is_already_downloaded=%s\n", is_already_downloaded ? "true" : "false");
+    filename = GetEntryFileName(wbe);
+
+    if (NULL == filename) {
+        return;
+    }
+
+    is_already_downloaded = IsEntriesAlreadyDownloaded(wbe);
 
     if (!is_already_downloaded) {
         char* url = WBConfigForgeDownloadURL(wbe, wbcred);
-        //        printf("url=%s\n", url);
         GetEbook(url, filename);
         free(url);
     }
 
     free(filename);
-}
-
-void _PrintEntry(const WBEntry* wbe) {
-    printf("_PrintEntry\n");
-    printf("is_archived = %d\n", wbe->is_archived);
-    printf("is_starred = %d\n", wbe->is_starred);
-    printf("id = %lu\n", wbe->id);
-    printf("created_at= %s\n", wbe->created_at);
-
-    //    typedef struct WBEntry {
-    //    bool  is_archived;
-    //    bool  is_starred;
-    //    unsigned long int id;
-    //    char* created_at;
-    //} WBEntry;
 }
 

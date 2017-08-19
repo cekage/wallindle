@@ -19,15 +19,12 @@
 
 #include "configmanager.h"
 
-bool  IsEntriesAlreadyDownloaded(const WBEntry* wbe);
-
+// TODO(k) Add test
 bool  IsEbookAlreadyDownloaded(const char* ebookfile);
 
 char* WBConfigForgeDownloadURL(const WBEntry* wbe,
                                const WBoAuthCred* wbcred);
 
 char* GetEntryFileName(const WBEntry* wbe);
-
-void PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred);
 
 #endif//PERFORM_ENTRIES_H_INCLUDED
