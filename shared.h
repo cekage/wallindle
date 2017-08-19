@@ -27,7 +27,7 @@
 
 #define DBUS_ARGS "--system","/default","com.lab126.powerd.resuming","int32:1"
 
-//TODO(k)ugly!
+//TODO(k) Ugly!
 #define MAX_INT_STRLEN (sizeof("4294967295"))
 
 //#define WNDL_ERROR (-1)
@@ -54,16 +54,18 @@
 #define SMAXIMUM_ENTRIES "500"
 
 #define DOWNLOAD_URL_MASK "http://%s/api/entries/%lu/export." FORMAT_EXPORT "?access_token=%s"
-#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d&sort=created"
+//#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d&sort=created"
+#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d"
 
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 
-#define UP_TO_X_DAYS (7)
+#define UP_TO_X_DAYS (70)
 
-typedef enum {
-    WNDL_OK = 0,
-    WNDL_ERROR = -1
+typedef enum wd_result {
+    WNDL_OK,
+    WNDL_ERROR
 } wd_result;
+
 
 wd_result StoreContent(const char* src, size_t contentsize, char** dest);
 
