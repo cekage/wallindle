@@ -20,10 +20,10 @@
 #include  "../oauth_manager.c"
 #include "../json_oauth_parse.c"
 #include "../json_common.c"
-
 #include "../json_entries_parse.c"
 #include "../perform_entries.c"
 #include "../http_request.c"
+#include "../entries_common.c"
 
 #include "_wbac_init.c"
 #include "_wbac_compare.c"
@@ -33,6 +33,7 @@
 #include "_jsonauth.c"
 #include "_jsonentries.c"
 #include "_performentries.c"
+#include "_entriescommon.c"
 
 /* Add definitions that need to be in the test runner's main file. */
 GREATEST_MAIN_DEFS();
@@ -47,5 +48,6 @@ int main(int argc, char** argv) {
     RUN_SUITE(_jsonauth);
     RUN_SUITE(_jsonentries);
     RUN_SUITE(_performentries);
+    RUN_SUITE(_entriescommon);
     GREATEST_MAIN_END();        /* display results */
 }
