@@ -26,7 +26,10 @@
 #include "entries_common.h"
 
 char* WBEntryFetchingURL(WBoAuthCred* wbc) {
-    const int last_week_in_utc = time(NULL) - UP_TO_X_DAYS * 24 * 60;
+
+    char* url;
+    int last_week_in_utc;
+    int sprinted;
 
     // TODO(k) Check real size instead of MAX_INT_STRLEN
     const  size_t  url_size = ( sizeof(FETCH_ENTRIES_MASK) - 1 //themasksize1
@@ -35,12 +38,31 @@ char* WBEntryFetchingURL(WBoAuthCred* wbc) {
                                 + strlen(wbc->wallabag_host)
                                 + strlen(wbc->token) + 1
                               ) * sizeof(char);
-    //    printf("url_size=%" PRIuPTR, url_size);
 
-    char* url = calloc(url_size  + 1, sizeof(char));
-    //    printf("\nAvant: %" PRIuPTR "%s\n", url_size, url);
-    snprintf(url, url_size, FETCH_ENTRIES_MASK,
-             wbc->wallabag_host, wbc->token, last_week_in_utc);
-    //    printf("\nAprès: %" PRIuPTR "%s\n", url_size, url);
+    url = calloc(url_size  + 1, sizeof(char));
+
+    if (NULL == url) {
+        fprintf(stderr, "Cannot allocate fetching url");
+        return NULL;
+    }
+
+    last_week_in_utc = time(NULL) - UP_TO_X_DAYS * 24 * 60;
+    sprinted = snprintf(url, url_size, FETCH_ENTRIES_MASK,
+                        wbc->wallabag_host, wbc->token, last_week_in_utc);
+
+    if (1 > sprinted) {
+        fprintf(stderr, "Cannot snprintf fetching url");
+        free(url);
+        return NULL;
+    }
+
     return url;
+}
+
+void _PrintEntry(const WBEntry* wbe) {
+    printf("_PrintEntry\n");
+    printf("is_archived = %d\n", wbe->is_archived);
+    printf("is_starred = %d\n", wbe->is_starred);
+    printf("id = %lu\n", wbe->id);
+    printf("created_at= %s\n", wbe->created_at);
 }
