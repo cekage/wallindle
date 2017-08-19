@@ -20,8 +20,8 @@
 #include <sys/wait.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "http_request.h"
 #include "json_entries_parse.h"
@@ -32,8 +32,6 @@
 #include "json_oauth_parse.h"
 
 #include "shared.h"
-
-static void UpdateKindleCatalog(void );
 
 static void UpdateKindleCatalog(void ) {
     __pid_t pid = fork();
@@ -59,51 +57,104 @@ static void UpdateKindleCatalog(void ) {
     }
 }
 
+static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
+
+    // Iterate entries until MAXIMUM or the first time id is zero
+    for (int i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
+
+//        _PrintEntry(&entries[i]);
+
+        // Retrieve file name
+        char* filename = GetEntryFileName(&entries[i]);
+
+        // Check if filename is null, must not happened !
+        if (NULL == filename) {
+            // in this case, go to next entries
+            continue;
+        }
+
+        // Check if ebook already exists
+        if (IsEbookAlreadyDownloaded(filename)) {
+            // in this case, free stuff and go to next entries
+            free(filename);
+            continue;
+        }
+
+        // Compute Url for downloading ebook
+        char* ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
+
+        // If getting ebook raises an error
+        if (WNDL_ERROR == GetEbook(ebookurl, filename)) {
+            // then displays error message
+            printf("fetching %s failed\n", ebookurl);
+        };
+
+        free(ebookurl);
+ //       }
+        free(filename);
+        free(entries[i].created_at);
+    }
+
+}
+
+// TODO(k) Too long !!
 int main(void ) {
     char* oauthurl;
     char* getentriesurl;
-    char* filename;
-    char* ebookurl;
     WBEntry* entries;
-    int i;
+    WBoAuthCred a_wbc;
 
-    MemoryStruct entriesjsonresponse = (MemoryStruct) {NULL, 0};
-    WBoAuthCred a_wbc = (WBoAuthCred) {NULL, NULL, NULL, NULL, NULL, NULL};
+    // Init auth json with empty values
     MemoryStruct authjsonresponse = (MemoryStruct) {NULL, 0};
+    // Init entries json with empty values
+    MemoryStruct entriesjsonresponse = (MemoryStruct) {NULL, 0};
 
+    // Initialize configuration
     if (WNDL_ERROR == WBConfigInit(&a_wbc)) {
+        WBConfigCleanup(&a_wbc);
         exit(EXIT_FAILURE);
     }
 
+    // Retrieve config data from config file
     if (WNDL_ERROR == WBConfigGet(&a_wbc)) {
+        WBConfigCleanup(&a_wbc);
         exit(EXIT_FAILURE);
     }
 
+    // Retrieve the forged url to get auth token
     oauthurl = WBConfigForgeoAuthURL(&a_wbc);
 
+    // Check if oAuth2 url is correctly build
     if (NULL == oauthurl) {
+        WBConfigCleanup(&a_wbc);
         exit(EXIT_FAILURE);
     }
 
-    //    authjsonresponse.memory = NULL;
-    //    authjsonresponse.size = 0;
-
-
+    // Check if oAuth2 url gives a json response
     if (WNDL_ERROR == GetJSON(oauthurl, &authjsonresponse)) {
         free(oauthurl); // Avoiding valgrind warnings
+        WBConfigCleanup(&a_wbc);
         exit(EXIT_FAILURE);
     }
 
+    // TODO(k) maybe another way than doubling free !
     free(oauthurl);
 
-    a_wbc.token = ExtractToken(authjsonresponse.memory);
+    // TODO(k) Avoiding memory leak…
+    free(a_wbc.token);
+    // Store the token in the cred object
+    a_wbc.token = ExtractoAuth2Token(authjsonresponse.memory);
 
+    // No token ?
     if (NULL == a_wbc.token) {
+        // Freeing cred object
         WBConfigCleanup(&a_wbc);
+        // Freeing memory
         free(authjsonresponse.memory);
         exit(EXIT_FAILURE);
     }
 
+    // TODO(k) maybe another way than doubling free !
     free(authjsonresponse.memory);
 
     getentriesurl = WBEntryFetchingURL(&a_wbc);
@@ -113,43 +164,17 @@ int main(void ) {
         exit(EXIT_FAILURE);
     }
 
+    // TODO(k) maybe another way than doubling free !
     free(getentriesurl);
 
-    //    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
+    // for debug : printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
 
     entries = JsonGetEntries(entriesjsonresponse.memory);
     free(entriesjsonresponse.memory);
 
     if (NULL != entries) {
         EnsureEbookDirExists();
-
-
-
-        for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
-
-            //        _PrintEntry(&entries[i]);
-            filename = GetEntryFileName(&entries[i]);
-
-            if (!IsEbookAlreadyDownloaded(filename)) {
-                ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
-
-                if (WNDL_ERROR == GetEbook(ebookurl, filename)) {
-                    printf("fetching %s failed\n", ebookurl);
-                };
-
-                free(ebookurl);
-
-                ebookurl = NULL;
-            } else {
-                //            printf("%s already downloaded !\n", filename);
-            }
-
-            free(filename);
-            filename = NULL;
-            free(entries[i].created_at);
-            entries[i].created_at = NULL;
-        }
-
+        ProceedUpdate(entries, a_wbc);
         free(entries);
         UpdateKindleCatalog();
     }
@@ -160,3 +185,5 @@ int main(void ) {
     printf("\nMischiefManaged!\n");
     return 0;
 }
+
+
