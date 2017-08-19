@@ -18,7 +18,6 @@
 
 TEST performentries_getfilename() {
     WBEntry wbe = (WBEntry) {false, false, 0x123, "DaTe"};
-
     char* filename = GetEntryFileName(&wbe);
     printf("filename = %s\n", filename);
     ASSERT_STR_EQ("./entries/00000123.mobi", filename);
@@ -46,9 +45,10 @@ TEST performentries_geturl() {
 
 TEST performentries_complete() {
     char* jsoncontent;
-    jsoncontent = WBReadEntriesJsonFile("./files/response_ok_total_10.json");
+    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_10.json");
     ASSERT(NULL != jsoncontent);
     WBEntry* entries = JsonGetEntries(jsoncontent);
+    ASSERT(NULL != entries);
 
     WBoAuthCred known = (WBoAuthCred) {
         "exAmple.org", "10921029",
@@ -59,9 +59,10 @@ TEST performentries_complete() {
 
     // Clean all created_at string
     for (int i = 0; i < MAXIMUM_ENTRIES; ++i) {
-        if (0 == entries[i].id) { break; }
-
-        PerformEverything(&entries[i], &known);
+        if (0 == entries[i].id) {
+                break;
+        }
+        _PerformEverything(&entries[i], &known);
         free(entries[i].created_at);
     }
 

@@ -15,9 +15,9 @@
 */
 
 TEST conffile_check_size_min() {
-    off_t size49 = CheckConfSize("./files/size49.cfg", true);
-    off_t size50 = CheckConfSize("./files/size50.cfg", true);
-    off_t size51 = CheckConfSize("./files/size51.cfg", true);
+    off_t size49 = GetFileSize("./files/size49.cfg", true);
+    off_t size50 = GetFileSize("./files/size50.cfg", true);
+    off_t size51 = GetFileSize("./files/size51.cfg", true);
     ASSERT_EQ(size49, -1);
     ASSERT_EQ(size50, 50);
     ASSERT_EQ(size51, 51);
@@ -26,10 +26,10 @@ TEST conffile_check_size_min() {
 
 
 TEST conffile_check_size_max() {
-    off_t size4095 = CheckConfSize("./files/size4095.cfg", true);
-    off_t size4096 = CheckConfSize("./files/size4096.cfg", true);
-    off_t size4097 = CheckConfSize("./files/size4097.cfg", true);
-    off_t size4097bis = CheckConfSize("./files/size4097.cfg", false);
+    off_t size4095 = GetFileSize("./files/size4095.cfg", true);
+    off_t size4096 = GetFileSize("./files/size4096.cfg", true);
+    off_t size4097 = GetFileSize("./files/size4097.cfg", true);
+    off_t size4097bis = GetFileSize("./files/size4097.cfg", false);
     ASSERT_EQ(size4095, 4095);
     ASSERT_EQ(size4096, 4096);
     ASSERT_EQ(size4097, -1);
