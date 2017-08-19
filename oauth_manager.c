@@ -26,8 +26,8 @@
 #include "oauth_manager.h"
 
 
-// TODO(k)Assigndefaultnullvalueshttps://stackoverflow.com/a/749690
-wd_result WBoAuth2Init(WBoAuth2Struct* wbo) {
+// TODO(k) Assign default null values https://stackoverflow.com/a/749690
+static wd_result _WBoAuth2Init(WBoAuth2Struct* wbo) {
 #define CHECKFIELD(FD) result &= (NULL != wbo->FD);
 #define INITFIELD(FD) wbo->FD = calloc(1, sizeof(char));CHECKFIELD(FD)
     bool result = true;
@@ -41,7 +41,7 @@ wd_result WBoAuth2Init(WBoAuth2Struct* wbo) {
 #undef CHECKFIELD
 }
 
-void WBoAuth2Cleanup(WBoAuth2Struct* wbo) {
+static void _WBoAuth2Cleanup(WBoAuth2Struct* wbo) {
 #define FREEFIELD(FD) free(wbo->FD);wbo->FD = NULL;
     FREEFIELD(access_token);
     FREEFIELD(refresh_token);
@@ -51,7 +51,7 @@ void WBoAuth2Cleanup(WBoAuth2Struct* wbo) {
 #undef FREEFIELD
 }
 
-void WBoAuth2Print(const WBoAuth2Struct* wbo) {
+static void _WBoAuth2Print(const WBoAuth2Struct* wbo) {
 #define PRINTFIELD(FD) printf("wbo->%s(%" PRIuPTR "o.)=%s\n", #FD, strlen(wbo->FD), wbo->FD)
     printf("\n");
     PRINTFIELD(access_token);
@@ -62,7 +62,7 @@ void WBoAuth2Print(const WBoAuth2Struct* wbo) {
 #undef PRINTFIELD
 }
 
-int WBoAuth2StringSet(const char* content, size_t contentsize,
-                      char** wbofield) {
+static int _WBoAuth2StringSet(const char* content, size_t contentsize,
+                              char** wbofield) {
     return StoreContent(content, contentsize, wbofield);
 }
