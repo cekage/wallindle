@@ -49,6 +49,7 @@ size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
 }
 
 wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
+    bool isfetched = true;
     CURL* curl_handle;
     CURLcode res;
     curl_global_init(CURL_GLOBAL_ALL);
@@ -68,9 +69,9 @@ wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
     res = curl_easy_perform(curl_handle);
 
     /* check for error s*/
-    if (res != CURLE_OK) {
+    if (CURLE_OK != res) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        return WNDL_ERROR;
+        isfetched = false;
     }
 
     /* clean up curl stuff*/
@@ -78,38 +79,45 @@ wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
     /* we're done with libcurl, so clean it up*/
     curl_global_cleanup();
 
-    return WNDL_OK;
+    return isfetched ? WNDL_OK : WNDL_ERROR;
 }
 
 wd_result GetEbook(const char* url, const char* filename) {
 
-    //    printf("store content of \"%s\"\n--> to %s\n", url, filename);
-
+    // Boilerplate for curl stuff
     CURL* curl;
-    FILE* fp;
     CURLcode res;
-    curl = curl_easy_init();
+    // TODO(k) remove this useless boolean
     bool isfetched = true;
 
+
+    curl = curl_easy_init();
+
     if (NULL != curl) {
-        fp = fopen(filename, "wb");
+        // Open the file "filename"
+        FILE* file_handle = fopen(filename, "wb");
+
+        // Curl set-up, url, callback & User Agent
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, file_handle);
         curl_easy_setopt(curl, CURLOPT_USERAGENT,
                          "agent-ckg-fait-mumuse-avec-libcurl/1.0");
 
+        // perform curl
         res = curl_easy_perform(curl);
 
-        if (CURLE_OK == res) {
-            isfetched = true;
-        } else {
+        // If no error it's ok
+        if (CURLE_OK != res) {
+            // if not, print to stderr
             fprintf(stderr, "curl_easy_perform() failed : %s\n", curl_easy_strerror(res));
             isfetched = false;
         }
 
+        // close opened file
+        fclose(file_handle);
+        // classic way to clean up a curl
         curl_easy_cleanup(curl);
-        fclose(fp);
     }
 
     return isfetched ? WNDL_OK : WNDL_ERROR;
