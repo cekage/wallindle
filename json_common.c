@@ -33,6 +33,33 @@
 
 static char* _WBReadFile(const char* filename, bool isConfig);
 
+int _GetTokenCountExt(const char* jsonresponse, jsmntok_t* tokens,
+                      unsigned int maxtoken) {
+    jsmn_parser parser;
+    jsmn_init(&parser);
+
+    if (NULL == jsonresponse) {
+        return 0;
+    }
+
+    // jsmn_parse in "count mode"
+    int token_count = jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
+                                 tokens, maxtoken);
+
+    printf(" token_count = %d\n", token_count);
+
+    if (token_count < 0) {
+        fprintf(stderr, "Failed to parse JSON : %d\n", token_count);
+        return 0;
+    }
+
+    return token_count;
+}
+
+int _GetTokenCount(const char* jsonresponse) {
+    return _GetTokenCountExt(jsonresponse, NULL, 0);
+}
+
 wd_result _JsonEquivTo(const char* json, const jsmntok_t*
                        tok, const char* s) {
     bool result;
@@ -49,40 +76,49 @@ char* WBReadConfigFile(const char*
     return _WBReadFile(filename, true);
 }
 
-char* WBReadEntriesJsonFile(const char*
-                            filename) {
-    return _WBReadFile(filename, false);
-}
-
-char* WBReadoAuthJsonFile(const char* filename) {
-    return _WBReadFile(filename, true);
-}
-
 static char* _WBReadFile(const char* filename, bool isConfig) {
-    FILE* f = fopen(filename, "r");
+    off_t filesize;
+    size_t  totalread;
 
-    if (NULL == f) {
+    char* filecontent;
+    FILE* file_handle;
+
+    file_handle = fopen(filename, "r");
+
+    if (NULL == file_handle) {
         fprintf(stderr, "Cannot open %s:%s\n", filename, strerror(errno));
         return NULL;
     }
 
-    const off_t filesize = CheckConfSize(filename, isConfig);
-    char* filecontent = calloc((unsigned long)filesize + 1UL, sizeof(char));
+    filesize = GetFileSize(filename, isConfig);
+    filecontent = calloc((size_t)filesize + 1UL, sizeof(char));
 
     if (NULL == filecontent) {
         fprintf(stderr, "Cannot allocate %jd for filecontent\n", (intmax_t) filesize);
+        fclose(file_handle);
         return NULL;
     }
 
-    const  size_t  totalread = fread(filecontent, sizeof(char),
-                                    (size_t)filesize, f);
-    fclose(f);
+    totalread = fread(filecontent, sizeof(char),
+                      (size_t)filesize, file_handle);
+    fclose(file_handle);
 
     if ( sizeof(char) > totalread) {
-        fprintf(stderr, "Too small content %"PRIuPTR" bytes\n", totalread);
+        fprintf(stderr, "Too small content %" PRIuPTR " bytes\n", totalread);
         free(filecontent);
         return NULL;
     }
 
     return filecontent;
+}
+
+// For testing purpose
+static char* _WBReadEntriesJsonFile(const char*
+                                    filename) {
+    return _WBReadFile(filename, false);
+}
+
+// For testing purpose
+static char* _WBReadoAuthJsonFile(const char* filename) {
+    return _WBReadFile(filename, true);
 }
