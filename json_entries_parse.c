@@ -33,23 +33,13 @@
 
 #include "json_entries_parse.h"
 
-static int _GetTokenCount(const char* jsonresponse) {
-    jsmn_parser parser;
-    jsmn_init(&parser);
-
-    // jsmn_parse in "count mode"
-    int token_count = jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
-                                 NULL, 0);
-
-    if (token_count < 0) {
-        fprintf(stderr, "Failed to parse JSON : %d\n", token_count);
-    }
-
-    return token_count;
-}
+static WBEntry* _ExtractEntries(long int max_entries, jsmntok_t* tokens,
+                                const char* jsonresponse, int token_count, int index);
+static void _FindKeysAndStore(jsmntok_t* tokens,
+                              const char* jsonresponse, int index, unsigned int entry_index,
+                              WBEntry* entries);
 
 static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count) {
-    //    jsmntok_t* tokens = calloc(count * 10, sizeof(jsmntok_t));
 
     jsmntok_t* tokens = calloc(count + 1, sizeof(jsmntok_t));
 
@@ -69,200 +59,236 @@ static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count) {
     return tokens;
 }
 
+// TODO(k) return WB ERROR / OK
 static int _GetJsonKeyPosition(const char* jsoncontent, const jsmntok_t* tokens,
                                int max_token_count, const char* key,
-                               jsmntype_t tokentype, int from) {
+                               jsmntype_t tokentype, int* from) {
     bool is_key_present;
-    int index = from;
 
     do {
         // Check key exists
-        is_key_present = (_JsonEquivTo(jsoncontent, &tokens[index],
+        is_key_present = (_JsonEquivTo(jsoncontent, &tokens[*from],
                                        key) == 0);
         // and if next item
-        ++index;
-        // is a tokentype
-        is_key_present &= (tokens[index].type == tokentype);
-    } while (index < max_token_count && !is_key_present);
+        ++(*from);
 
-    return index;
+        // is a tokentype
+        is_key_present &= (tokens[*from].type == tokentype);
+    } while (*from < max_token_count && !is_key_present);
+
+    if (*from == max_token_count) {
+        fprintf(stderr, "%s expected but not found\n", key);
+    }
+
+    return (*from);
 }
 
 static void _TokenPrint(jsmntok_t t) {
     printf("Type=%d, start=%d, end=%d, size=%d\n", t.type, t.start, t.end, t.size);
 }
 
-WBEntry* JsonGetEntries(const char* jsonresponse) {
-#define NEXT_ITEM ++index
-    int token_count = _GetTokenCount(jsonresponse);
 
-    if (0 >= token_count) { return NULL; }
+static long int _GetMaxEntriesField(jsmntok_t* tokens,
+                                    const char* jsonresponse,
+                                    int token_count, int* pindex, const char* field) {
+    int index = *pindex; // pointer to index
+    char* str_value = NULL;
+    long int numeric_value;
 
-    jsmntok_t tokens[token_count];
+    // Reaching field
+    _GetJsonKeyPosition(jsonresponse, tokens, token_count, field, JSMN_PRIMITIVE,
+                        &index);
+
+    // if token_count is reached, then
+    if (index == token_count) {
+        // field is not found so print error & return zero
+        fprintf(stderr, "'%s' field not found\n", field);
+        return 0;
+    }
+
+    // Copy content in str_value
+    StoreContent(jsonresponse + tokens[index].start,
+                 MIN(tokens[index].end - tokens[index].start, 4), &str_value);
+    // Convert in 10-basis to numeric_value
+    // TODO better check strtol
+    numeric_value = strtol(str_value, NULL, 10);
+    // Releasing str_value
+    free(str_value);
+    return numeric_value;
+}
+
+static int _GetMaxEntries(jsmntok_t* tokens, const char* jsonresponse,
+                          int token_count, int* pindex) {
+
+    long int total;
+    long int pages; // Number of pages
+
+    // Reaching key "pages"
+    pages = _GetMaxEntriesField(tokens, jsonresponse, token_count, pindex, "pages");
+
+    // Checking if page number
+    if (pages <= 0) {
+        fprintf(stderr, "pages primitive >1 expected\n");
+        return 0;
+    }
+
+    // Reaching key "total"
+    total = _GetMaxEntriesField(tokens, jsonresponse, token_count, pindex,
+                                "total");
+
+    if (total <= 0) {
+        fprintf(stderr, "'total' primitive >1 expected\n");
+        return 0;
+    }
+
+    return ceil( (double) MIN(total, MAXIMUM_ENTRIES) / pages);
+}
+
+static wd_result _BuildTokens(const char* jsonresponse, jsmntok_t* tokens,
+                              int token_count) {
+
+    wd_result result = WNDL_OK;
     jsmn_parser parser;
     jsmn_init(&parser);
-    jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
-               tokens, token_count);
-    //    jsmntok_t tokens= _AllocateTokens(jsonresponse,token_count);
-    //    if (NULL = tokens) { return NULL; }
+    int parse_status = jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
+                                  tokens,
+                                  token_count);
 
-
-    if (tokens[0].type != JSMN_OBJECT) {
-        fprintf(stderr, "Object expected\n");
-        //        free(tokens);
-        return NULL;
+    if (0 > parse_status ) {
+        fprintf(stderr, "bad json structure\n");
+        result = WNDL_ERROR;
+    } else {
+        if (tokens[0].type != JSMN_OBJECT) {
+            fprintf(stderr, "Object expected\n");
+            result = WNDL_ERROR;
+        }
     }
 
+    return result;
+}
+
+
+// TODO(k) rething usage of must_continue (previously a return NULL)
+WBEntry* JsonGetEntries(const char* jsonresponse) {
+    WBEntry* entries = NULL;
+    long int max_entries;
     int index = 1;
+    bool must_continue = true;
 
-    /*
-     * Searching pages
-     */
+    const int token_count = _GetTokenCount(jsonresponse);
 
-    index = _GetJsonKeyPosition(jsonresponse, tokens, token_count,
-                                "pages", JSMN_PRIMITIVE, index);
+    must_continue = (token_count > 0);
 
-    char* str_pages = NULL;
-    StoreContent(jsonresponse + tokens[index].start,
-                 MIN(tokens[index].end - tokens[index].start, 4),
-                 &str_pages);
-    long int pages = strtol(str_pages, NULL, 10);
-    free(str_pages);
+    jsmntok_t tokens[token_count];
 
-    if (pages < 1) {
-        fprintf(stderr, "pages primitive >1 expected\n");
-        //        free(tokens);
-        return NULL;
+    if (must_continue
+            && WNDL_ERROR == _BuildTokens(jsonresponse, tokens, token_count)) {
+
+        must_continue = false;
     }
 
-    //    printf("pages primitive found @ index = %d ---> %.*s\n", index, 20,
-    //           jsonresponse + tokens[index].start);
+    if (must_continue) {
+        max_entries = _GetMaxEntries(tokens, jsonresponse, token_count, &index);
+        must_continue = max_entries > 1;
 
-    /*
-     * Searching total
-     */
-    index = _GetJsonKeyPosition(jsonresponse, tokens, token_count,
-                                "total", JSMN_PRIMITIVE, index);
+        _GetJsonKeyPosition(jsonresponse, tokens, token_count,
+                            "_embedded", JSMN_OBJECT, &index);
+        must_continue &= (token_count != index);
 
-    if (index == token_count) {
-        //        printf("total primitive expected\n");
-        //        free(tokens);
-        return NULL;
+        _GetJsonKeyPosition(jsonresponse, tokens, token_count,
+                            "items", JSMN_ARRAY, &index);
+        must_continue &= (token_count != index);
+
     }
 
-    //    printf("total primitive found @ index = %d ---> %.*s\n", index, 20,
-    //           jsonresponse + tokens[index].start);
-    char* str_max_entries = NULL;
-    StoreContent(jsonresponse + tokens[index].start,
-                 MIN(tokens[index].end - tokens[index].start, 4),
-                 &str_max_entries);
-    long int max_entries = strtol(str_max_entries, NULL, 10);
-    free(str_max_entries);
-
-    if (max_entries < 1) {
-        fprintf(stderr, "total primitive >1 expected\n");
-        //        free(tokens);
-        return NULL;
+    if (must_continue) {
+        index += 2;
+        entries = _ExtractEntries(max_entries, tokens, jsonresponse, token_count,
+                                  index);
     }
 
-    /*
-     * Determines max_entries : capped total div by pages
-     */
-    max_entries = ceil( (double) MIN(max_entries, MAXIMUM_ENTRIES) / pages);
+    return entries;
+}
 
-    index = _GetJsonKeyPosition(jsonresponse, tokens, token_count,
-                                "_embedded", JSMN_OBJECT, index);
+static void _printtoken(jsmntok_t token, const char* json) {
+    printf("Token start:%d end:%d size:%d type:%d  --> %.*s\n", token.start,
+           token.end, token.size, token.type, 30, json + token.start);
+}
 
-    if (index == token_count) {
-        fprintf(stderr, "_embedded object expected\n");
-        //        free(tokens);
-        return NULL;
-    }
+static WBEntry* _ExtractEntries(long int max_entries, jsmntok_t* tokens,
+                                const char* jsonresponse, int token_count, int index) {
+#define NEXT_ITEM ++index
 
-    //    printf("_embedded object found @ index = %d ---> %.*s\n", index, 20,
-    //           jsonresponse + tokens[index].start);
+    WBEntry* entries;
+    unsigned int entry_index;
 
-    index = _GetJsonKeyPosition(jsonresponse, tokens, token_count,
-                                "items", JSMN_ARRAY, index);
+    entries = calloc(max_entries + 1, sizeof(WBEntry));
 
-    if (index == token_count) {
-        fprintf(stderr, "items array expected\n");
-        //        free(tokens);
-        return NULL;
-    }
+    if (NULL == entries)
+    { return NULL; }
 
-    //    printf("items array found @ index = %d ---> %.*s\n", index, 20,
-    //           jsonresponse + tokens[index].start);
-
-    //   WBEntry entries[max_entries + 1];
-    WBEntry* entries = calloc(max_entries + 1, sizeof(WBEntry));
-
-    //    printf(" adding true\n");
-
-    //    printf("@index = %d ---> %.*s\n", index, 20,
-    //           jsonresponse + tokens[index].start);
-    NEXT_ITEM;
-    NEXT_ITEM;
-
-    //    printf("DO ! \n");
-    unsigned int entry_index = 0;
+    entry_index = 0;
 
     do { // new entry
         entries[entry_index] = (WBEntry) {.id = -1, .created_at = NULL};
         --index;
         int item_end = tokens[index].end;
-        //        printf("\n** FIRST DO ** @%d index = %d ---> %.*s TO %d\n", tokens[index].start,
-        //               index, 30, //MIN(20,tokens[index].end - tokens[index].start),
-        //               jsonresponse + tokens[index].start, item_end);
 
+        //        _printtoken(tokens[index], jsonresponse);
+        //        printf("** entry_index= %d : item_end = %d\n",entry_index, tokens[index].end);
         do {
-            //            _TokenPrint(tokens[index]);
-            //            if (++limit<10)
-            //            printf("@%d index = %d ---> %.*s\n", tokens[index].start, index, MIN(20,
-            //                    tokens[index].end - tokens[index].start),
-            //                   jsonresponse + tokens[index].start);
+            //            printf("--> index = %d\n",index);
+            _FindKeysAndStore(tokens, jsonresponse, index, entry_index, entries);
 
-            if (_JsonEquivTo(jsonresponse, &tokens[index], "id") == 0) {
-                char* value = NULL;
-                NEXT_ITEM;
-                StoreContent(jsonresponse + tokens[index].start,
-                             tokens[index].end - tokens[index].start, &value);
-                entries[entry_index].id = strtol(value, NULL, 10);
-                free(value);
-                NEXT_ITEM;
-                continue;
-            } else if (_JsonEquivTo(jsonresponse, &tokens[index], "created_at") == 0) {
-                NEXT_ITEM;
-                StoreContent(jsonresponse + tokens[index].start,
-                             tokens[index].end - tokens[index].start,
-                             &entries[entry_index].created_at);
-                NEXT_ITEM;
-                continue;
-
-            }
-
-            //            if (limit<10)
-            //            printf("end while ? index %d vs token_count %d || item_end %d vs %d\n\n", index,
-            //                   token_count, tokens[index].start, item_end);
             NEXT_ITEM;
-
+            //            _printtoken(tokens[index], jsonresponse);
+            //            NEXT_ITEM;
+            //            _printtoken(tokens[index], jsonresponse);
         } while (index < token_count && tokens[index].start < item_end);
 
-        //        if (index == token_count) { break; }
-
-        //        printf("END WHILE item_end ! \n\n");
-        //        _PrintEntry(&entries[entry_index]);
-        //        printf("\n\n");
+        //        printf("\n** entry_index= %d --> jsonresponse + tokens[%d].start = %.*s\n",entry_index, index, 40,jsonresponse+ tokens[index].start);
         ++entry_index;
         NEXT_ITEM;
-        //        printf("end while ? entry_index %d vs %lu\n", entry_index, max_entries);
-    } while (index < token_count && entry_index < max_entries);
+        //        _printtoken(tokens[index], jsonresponse);
 
-    //    printf("END WHILE entry_index ! \n\n\n\n");
+    } while (index < token_count && entry_index < max_entries);
 
     entries[entry_index] = (WBEntry) {.id = 0, .created_at = NULL};
 
     return entries;
 #undef NEXT_ITEM
+}
+
+
+
+
+static void _FindKeysAndStore(jsmntok_t* tokens, const char* jsonresponse,
+                              int index,
+                              unsigned int entry_index, WBEntry* entries) {
+
+    // get size of tokens by subtitute start field to end field
+    unsigned int token_size = tokens[index].end - tokens[index].start + 1;
+
+    if (_JsonEquivTo(jsonresponse, &tokens[index], "id") == 0) {
+        char* value = NULL;
+        //        printf("StoreContent : jsonresponse+delta = %.*s  ",20, jsonresponse+tokens[index].start);
+        // Point to next token : value of "id"
+        ++index;
+        // Store token content inside "value"
+        StoreContent(jsonresponse + tokens[index].start, token_size, &value);
+        //        printf(" &value = %s ", value);
+        // Convert string value in entries field "id"
+        entries[entry_index].id = strtol(value, NULL, 10);
+        //        printf(" entries[%d].id = %lu\n", entry_index, entries[entry_index].id);
+
+        // No more usage of value : releasing
+        free(value);
+    } else if (_JsonEquivTo(jsonresponse, &tokens[index], "created_at") == 0) {
+        // Point to next token : value of "id"
+        ++index;
+        // Store token content inside "created_at"
+        StoreContent(jsonresponse + tokens[index].start, token_size,
+                     &entries[entry_index].created_at);
+    }
 }
 
