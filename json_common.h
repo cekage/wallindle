@@ -20,14 +20,16 @@
 #include "./lib/jsmn/jsmn.h"
 #include "shared.h"
 
+// TODO(k) Add test
 wd_result _JsonEquivTo(const char* json, const jsmntok_t*
                        tok, const char* s);
 
+// TODO(k) Add test
 char* WBReadConfigFile(const char* filename);
 
-char* WBReadEntriesJsonFile(const char* filename);
-
-char* WBReadoAuthJsonFile(const char* filename);
+int _GetTokenCount(const char* jsonresponse);
+int _GetTokenCountExt(const char* jsonresponse, jsmntok_t* tokens,
+                      unsigned int maxtoken);
 
 #endif//JSON_COMMON_PARSE_H_INCLUDED
 
