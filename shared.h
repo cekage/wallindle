@@ -61,6 +61,8 @@
 
 #define UP_TO_X_DAYS (70)
 
+#define WALLINDLE_USERAGENT ("agent-ckg-fait-mumuse-avec-libcurl/1.0")
+
 typedef enum wd_result {
     WNDL_OK,
     WNDL_ERROR
