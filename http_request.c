@@ -28,28 +28,55 @@
 #include "http_request.h"
 #include "shared.h"
 
-size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
-                            void* userp) {
+/*
+ * Function: WriteMemoryCallback
+ * ----------------------------
+ *   Append "n" bytes of "content" to "userp". With "n"
+ *   computed with the size of the content to write.
+ *   *Original code from libcurl !*
+ *
+ *   contents: elements to be written
+ *   size: size of one element to write
+ *   nmemb: the count of elements to write
+ *   userp: a MemoryStruct to be appended
+ *
+ *   returns: the amount of element written
+ */
+size_t WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
+                           void* userp) {
     size_t realsize = size * nmemb;
     struct MemoryStruct* mem = (struct MemoryStruct*)userp;
 
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);
 
     if (mem->memory == NULL) {
-        /* out of memory! */
+        // out of memory!
         fprintf(stderr, "not enough memory (realloc returned NULL)\n");
         return 0;
     }
 
+    // Append "realsize" bytes of "content" to memory
     memcpy(&(mem->memory[mem->size]), contents, realsize);
-    mem->size += realsize;
-    mem->memory[mem->size] = 0;
+
+    mem->size += realsize;      // update MemoryStruct size
+    mem->memory[mem->size] = 0; // Add null terminator (String)
 
     return realsize;
 }
 
-wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
-    bool isfetched = true;
+
+/*
+ * Function: GetJSON
+ * ----------------------------
+ *   Download content at "url" and store it on jsonresponse
+ *
+ *   url: an url (probably http://domain.tld/
+ *   jsonresponse: a MemoryStruct to be filled
+ *
+ *   returns: WNDL_OK if everything goes well, WNDL_ERROR otherwise
+ */
+wd_result GetJSON(const char* url, const void* jsonresponse) {
+    // TODO(k) change proto as follows : char* GetJSON(const char* url)
     CURL* curl_handle;
     CURLcode res;
     curl_global_init(CURL_GLOBAL_ALL);
@@ -61,17 +88,15 @@ wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
 
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
     /* we pass our 'chunk' struct to the callback function */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)jsonresponse);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, jsonresponse);
     /* some servers don't like requests that are made without a user-agent field, so we provide one */
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
-                     "agent-ckg-fait-mumuse-avec-libcurl/1.0");
+    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, WALLINDLE_USERAGENT);
     /* getit! */
     res = curl_easy_perform(curl_handle);
 
     /* check for error s*/
     if (CURLE_OK != res) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        isfetched = false;
     }
 
     /* clean up curl stuff*/
@@ -79,17 +104,24 @@ wd_result GetJSON(const char* url, MemoryStruct* jsonresponse) {
     /* we're done with libcurl, so clean it up*/
     curl_global_cleanup();
 
-    return isfetched ? WNDL_OK : WNDL_ERROR;
+    return (CURLE_OK == res) ? WNDL_OK : WNDL_ERROR;
 }
 
+/*
+ * Function: GetEbook
+ * ----------------------------
+ *   Download an url content to a file.
+ *
+ *   url: an url (probably http://domain.tld/
+ *   filename: a file (will be overwritten)
+ *
+ *   returns: WNDL_OK if everything goes well, WNDL_ERROR otherwise
+ */
 wd_result GetEbook(const char* url, const char* filename) {
 
     // Boilerplate for curl stuff
     CURL* curl;
     CURLcode res;
-    // TODO(k) remove this useless boolean
-    bool isfetched = true;
-
 
     curl = curl_easy_init();
 
@@ -101,8 +133,7 @@ wd_result GetEbook(const char* url, const char* filename) {
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, file_handle);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT,
-                         "agent-ckg-fait-mumuse-avec-libcurl/1.0");
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, WALLINDLE_USERAGENT);
 
         // perform curl
         res = curl_easy_perform(curl);
@@ -111,7 +142,6 @@ wd_result GetEbook(const char* url, const char* filename) {
         if (CURLE_OK != res) {
             // if not, print to stderr
             fprintf(stderr, "curl_easy_perform() failed : %s\n", curl_easy_strerror(res));
-            isfetched = false;
         }
 
         // close opened file
@@ -120,5 +150,5 @@ wd_result GetEbook(const char* url, const char* filename) {
         curl_easy_cleanup(curl);
     }
 
-    return isfetched ? WNDL_OK : WNDL_ERROR;
+    return (CURLE_OK == res) ? WNDL_OK : WNDL_ERROR;
 }
