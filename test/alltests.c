@@ -34,6 +34,7 @@
 #include "_jsonentries.c"
 #include "_performentries.c"
 #include "_entriescommon.c"
+#include "_httprequest.c"
 
 /* Add definitions that need to be in the test runner's main file. */
 GREATEST_MAIN_DEFS();
@@ -49,5 +50,6 @@ int main(int argc, char** argv) {
     RUN_SUITE(_jsonentries);
     RUN_SUITE(_performentries);
     RUN_SUITE(_entriescommon);
+    RUN_SUITE(_httprequest);
     GREATEST_MAIN_END();        /* display results */
 }
