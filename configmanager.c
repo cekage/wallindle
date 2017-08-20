@@ -34,7 +34,7 @@ static wd_result _WBReadConfiguration(const char* filename,
 static void _WBConfigPrint(const WBoAuthCred* wbc);
 static bool _WBConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
 
-static int WBConfigStringSet(const char* content, size_t  contentsize,
+static int _WBConfigStringSet(const char* content, size_t  contentsize,
                              char** wbcfield);
 
 off_t GetFileSize(const char* filename, bool check_min_max) {
@@ -103,7 +103,7 @@ static void _AuthFieldFoundAndSave(bool* proceed, char* src, char** dest,
                 token[last_char_pos] = 0;
             }
 
-            WBConfigStringSet(token, strlen(token), dest);
+            _WBConfigStringSet(token, strlen(token), dest);
         } else {
             fprintf(stderr, "Cannot determine field %s\n", fieldname);
         }
@@ -178,7 +178,7 @@ void WBConfigCleanup(WBoAuthCred* wbc) {
 #undef  FREEFIELD
 }
 
-static int WBConfigStringSet(const char* content, size_t  contentsize,
+static int _WBConfigStringSet(const char* content, size_t  contentsize,
                              char** wbcfield) {
 
     return StoreContent(content, contentsize, wbcfield);
