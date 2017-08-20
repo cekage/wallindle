@@ -30,7 +30,7 @@ typedef struct MemoryStruct {
 size_t  WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
                             void* userp);
 
-wd_result GetJSON(const char* url, MemoryStruct* jsonresponse);
+wd_result GetJSON(const char* url, const void* jsonresponse);
 
 wd_result GetEbook(const char* url, const char* filename);
 
