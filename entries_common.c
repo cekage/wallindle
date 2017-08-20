@@ -66,3 +66,9 @@ void _PrintEntry(const WBEntry* wbe) {
     printf("id = %lu\n", wbe->id);
     printf("created_at= %s\n", wbe->created_at);
 }
+
+void WBEntryCleaup(WBEntry* wbe) {
+    free(wbe->created_at);
+    wbe->created_at=NULL;
+    wbe->id=0;
+}

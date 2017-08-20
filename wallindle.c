@@ -62,7 +62,7 @@ static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
     // Iterate entries until MAXIMUM or the first time id is zero
     for (int i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
 
-//        _PrintEntry(&entries[i]);
+        //        _PrintEntry(&entries[i]);
 
         // Retrieve file name
         char* filename = GetEntryFileName(&entries[i]);
@@ -79,6 +79,7 @@ static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
             free(filename);
             continue;
         }
+        printf("Downloading 0x%lux -> %s ",entries[i].id, filename);
 
         // Compute Url for downloading ebook
         char* ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
@@ -90,11 +91,11 @@ static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
         };
 
         free(ebookurl);
- //       }
-        free(filename);
-        free(entries[i].created_at);
-    }
 
+        //       }
+        free(filename);
+
+    }
 }
 
 // TODO(k) Too long !!
@@ -175,6 +176,9 @@ int main(void ) {
     if (NULL != entries) {
         EnsureEbookDirExists();
         ProceedUpdate(entries, a_wbc);
+        for (int i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
+            WBEntryCleaup(&entries[i]);
+        }
         free(entries);
         UpdateKindleCatalog();
     }
