@@ -24,13 +24,14 @@ TEST httprequest_ok() {
 
     ASSERT_EQ(WNDL_OK, result);
     ASSERT_STR_EQ(expected, curlresponse.memory);
+    free(curlresponse.memory);
 
     PASS();
 }
 
 TEST httpSrequest_ok() {
     const char* expected = "{\"string\": \"Hello wallindle test :-)\"}";
-    const char* url = "https://api.ipify.org/?format=json";
+    const char* url = "https://raw.githubusercontent.com/cekage/wallindle/master/test/files/wallindle.json";
 
     MemoryStruct curlresponse = (MemoryStruct) {NULL, 0};
 
@@ -38,7 +39,7 @@ TEST httpSrequest_ok() {
 
     ASSERT_EQ(WNDL_OK, result);
     ASSERT_STR_EQ(expected, curlresponse.memory);
-
+    free(curlresponse.memory);
     PASS();
 }
 
