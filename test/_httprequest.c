@@ -28,6 +28,21 @@ TEST httprequest_ok() {
     PASS();
 }
 
+TEST httpSrequest_ok() {
+    const char* expected = "{\"string\": \"Hello wallindle test :-)\"}";
+    const char* url = "https://api.ipify.org/?format=json";
+
+    MemoryStruct curlresponse = (MemoryStruct) {NULL, 0};
+
+    wd_result result = GetJSON(url, &curlresponse);
+
+    ASSERT_EQ(WNDL_OK, result);
+    ASSERT_STR_EQ(expected, curlresponse.memory);
+
+    PASS();
+}
+
 SUITE(_httprequest) {
     RUN_TEST(httprequest_ok);
+    RUN_TEST(httpSrequest_ok);
 }
