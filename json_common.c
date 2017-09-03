@@ -33,8 +33,10 @@
 
 static char* _WBReadFile(const char* filename, bool isConfig);
 
-int _GetTokenCountExt(const char* jsonresponse, jsmntok_t* tokens,
-                      unsigned int maxtoken) {
+unsigned int _GetTokenCountExt(const char* jsonresponse, jsmntok_t* tokens,
+                               unsigned int maxtoken) {
+
+    int token_count;
     jsmn_parser parser;
     jsmn_init(&parser);
 
@@ -43,20 +45,20 @@ int _GetTokenCountExt(const char* jsonresponse, jsmntok_t* tokens,
     }
 
     // jsmn_parse in "count mode"
-    int token_count = jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
+    token_count = jsmn_parse(&parser, jsonresponse, strlen(jsonresponse),
                                  tokens, maxtoken);
 
-    printf(" token_count = %d\n", token_count);
+    //    printf(" token_count = %d\n", token_count);
 
     if (token_count < 0) {
         fprintf(stderr, "Failed to parse JSON : %d\n", token_count);
-        return 0;
+        token_count = 0;
     }
 
     return token_count;
 }
 
-int _GetTokenCount(const char* jsonresponse) {
+unsigned int _GetTokenCount(const char* jsonresponse) {
     return _GetTokenCountExt(jsonresponse, NULL, 0);
 }
 
@@ -66,13 +68,12 @@ wd_result _JsonEquivTo(const char* json, const jsmntok_t*
 
     result = (tok->type == JSMN_STRING);
     result &= ((int)strlen(s) == (tok->end - tok->start));
-    result &= (strncmp(json + tok->start, s, tok->end - tok->start) == 0);
+    result &= (0 == strncmp(json + tok->start, s, tok->end - tok->start));
 
     return (result ? WNDL_OK : WNDL_ERROR);
 }
 
-char* WBReadConfigFile(const char*
-                       filename) {
+char* WBReadConfigFile(const char* filename) {
     return _WBReadFile(filename, true);
 }
 
@@ -113,12 +114,11 @@ static char* _WBReadFile(const char* filename, bool isConfig) {
 }
 
 // For testing purpose
-static char* _WBReadEntriesJsonFile(const char*
-                                    filename) {
+static char* _TestReadEntriesJsonFile(const char* filename) {
     return _WBReadFile(filename, false);
 }
 
 // For testing purpose
-static char* _WBReadoAuthJsonFile(const char* filename) {
+static char* _TestReadoAuthJsonFile(const char* filename) {
     return _WBReadFile(filename, true);
 }
