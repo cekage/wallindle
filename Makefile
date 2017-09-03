@@ -15,7 +15,7 @@ LDFLAGS=`/usr/bin/curl-config --libs` -lm
 
 EXEC=wallindle
 
-OTHERC=configmanager.c entries_common.c entries_parse.c http_request.c \
+OTHERC=configmanager.c entries_common.c http_request.c \
 	   json_common.c json_entries_parse.c json_oauth_parse.c \
 	   perform_entries.c shared.c \
 	   lib/jsmn/jsmn.c
