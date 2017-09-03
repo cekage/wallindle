@@ -11,11 +11,12 @@ CFLAGS=-O0 -g -m64 -std=iso9899:1999 -pedantic -Wall -Wshadow -Wpointer-arith -W
 ARM_CFLAGS=-mfpu=vfp -mfloat-abi=softfp -mtune=cortex-a8 -march=armv7-a
 
 LDFLAGS=lib/curl_x86_64/lib/libcurl.a -DCURL_STATICLIB -Ilib/curl_x86_64/include -lm
+LDFLAGS=`/usr/bin/curl-config --libs` -lm
 
 EXEC=wallindle
 
 OTHERC=configmanager.c entries_common.c entries_parse.c http_request.c \
-	   json_common.c json_entries_parse.c json_oauth_parse.c oauth_manager.c \
+	   json_common.c json_entries_parse.c json_oauth_parse.c \
 	   perform_entries.c shared.c \
 	   lib/jsmn/jsmn.c
 
@@ -43,10 +44,10 @@ astyle:
 	 *.c *.h
 
 arm:
-	$(eval CC := arm-linux-gnueabi-gcc)
+#	$(eval CC := arm-linux-gnueabi-gcc)
+	$(eval CC := arm-kindle-linux-gnueabi-gcc)
 	$(eval CFLAGS := -O0 -std=iso9899:1999  )
-	$(eval LDFLAGS := -Ilib/curl_src/include/)
-	$(eval LDFLAGS := lib/curl_arm_32/lib/libcurl.a -lrt -DCURL_STATICLIB -Ilib/curl_arm_32/include -lm)
+	$(eval LDFLAGS :=  `./lib/curlkindle/bin/curl-config --libs` -lm)
 	$(CC) $(CFLAGS) $(ARM_CFLAGS) wallindle.c  $(OTHERC) -o $(EXEC) $(LDFLAGS)
 
 codewarnings:
