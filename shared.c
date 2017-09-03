@@ -50,14 +50,14 @@ void EnsureEbookDirExists(void) {
  *  contentsize: the number of char to transfert
  *  dest: adress to write content
  *
- *  returns: WNDL_OK if everything is ok. An error plus WNDL_ERROR elsewise.
+ *  returns: WNDL_OK if everything is ok. An error plus WNDL_ERROR otherwise.
  */
 wd_result StoreContent(const char* src, size_t contentsize, char** dest) {
 
     wd_result result = WNDL_OK;
 
     // Compute the amount of memory to allocate
-    const  size_t  realsize = MIN(contentsize, LIMIT_DYNAMIC_STRING)*sizeof(char);
+    const  size_t  realsize = MIN(contentsize, LIMIT_DYNAMIC_STRING) * sizeof(char);
 
     // If dest is null
     if (NULL == *dest) {
@@ -80,5 +80,6 @@ wd_result StoreContent(const char* src, size_t contentsize, char** dest) {
         // just to be sure dest is really null terminated
         *(*dest + realsize) = 0;
     }
+
     return result;
 }
