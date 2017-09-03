@@ -30,5 +30,4 @@ char* WBEntryFetchingURL(WBoAuthCred* wbc);
 
 void WBEntryCleaup(WBEntry* wbe);
 
-void _PrintEntry(const WBEntry* wbe);
 #endif//ENTRIES_COMMON_H_INCLUDED
