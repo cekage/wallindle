@@ -28,10 +28,21 @@
 
 #include "perform_entries.h"
 
-static bool IsEntriesAlreadyDownloaded(const WBEntry* wbe);
+static bool _IsEntriesAlreadyDownloaded(const WBEntry* wbe);
+//static void _PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred);
 
-char* WBConfigForgeDownloadURL(const WBEntry* wbe,
-                               const WBoAuthCred* wbcred) {
+/*
+ * Function: WBConfigForgeDownloadURL
+ * ----------------------------
+ *   Compute the url for downloading an entry using credentials
+ *
+ *   wbe: a pointer to a WBEntry
+ *   wbcred: a pointer to a WBoAuthCred
+ *
+ *   returns: an url if succeeds, a null pointer otherwise.
+ */
+char* WBConfigForgeDownloadURL(const WBEntry* wbe, const WBoAuthCred* wbcred) {
+
     char* url;
     int sprinted;
 
@@ -70,7 +81,16 @@ char* WBConfigForgeDownloadURL(const WBEntry* wbe,
     return url;
 }
 
-
+/*
+ * Function: GetEntryFileName
+ * ----------------------------
+ *   Compute the file name for storing an entry on disk
+ *
+ *   wbe: a pointer to a WBEntry
+ *
+ *   returns: a filename based on ENTRY_MASK if succeeds,
+ *   and a null pointer otherwise.
+ */
 char* GetEntryFileName(const WBEntry* wbe) {
     char* result;
     size_t realsize;
@@ -87,9 +107,11 @@ char* GetEntryFileName(const WBEntry* wbe) {
     if (NULL == result) {
         fprintf(stderr, "Cannot calloc entry file name");
     } else {
+        // Compute filename and store it in result
         int sprinted = snprintf(result, realsize, ENTRY_MASK, wbe->id);
 
-        if (1 > sprinted) {
+        // Check if snprintf works
+        if (0 >= sprinted) {
             fprintf(stderr, "Cannot snprintf entry file name");
             free(result);
             result = NULL;
@@ -98,8 +120,64 @@ char* GetEntryFileName(const WBEntry* wbe) {
 
     return result;
 }
+
+/*
+ * Function: IsEbookAlreadyDownloaded
+ * ----------------------------
+ *   Basically, checks whether a file already exists
+ *
+ *   ebookfile: a pointer to a filename
+ *
+ *   returns: true if file exists and size > 0, returns
+ *   false otherwise.
+ */
+bool IsEbookAlreadyDownloaded(const char* ebookfile) {
+    struct stat fs_stat = {0};
+    bool  result = false;
+
+    if (stat(ebookfile, &fs_stat) == 0) {
+        result = (fs_stat.st_size > 0);
+    }
+
+    return result;
+}
+
+/*
+ * Function: _PerformEverything
+ * ----------------------------
+ *   For tests only : do not use.
+ *
+ *   wbe: a pointer to a WBEntry
+ *   wbcred: a pointer to a WBoAuthCred
+ *
+ *   returns: true if file exists and size > 0, returns
+ *   false otherwise.
+ */
+static void _TestPerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred) {
+
+    char* filename;
+    bool  is_already_downloaded;
+    EnsureEbookDirExists();
+
+    filename = GetEntryFileName(wbe);
+
+    if (NULL == filename) {
+        return;
+    }
+
+    is_already_downloaded = _IsEntriesAlreadyDownloaded(wbe);
+
+    if (!is_already_downloaded) {
+        char* url = WBConfigForgeDownloadURL(wbe, wbcred);
+        GetEbook(url, filename);
+        free(url);
+    }
+
+    free(filename);
+}
+
 // TODO(k) 1/ Rename IsEbookAlreadyDownloaded 2/ use it on IsEntriesAlreadyDownloaded
-static bool IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
+static bool _IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
     struct stat fs_stat = {0};
     bool  result;
     char* filename = GetEntryFileName(wbe);
@@ -115,38 +193,3 @@ static bool IsEntriesAlreadyDownloaded(const WBEntry* wbe) {
     free(filename);
     return result;
 }
-
-bool IsEbookAlreadyDownloaded(const char* ebookfile) {
-    struct stat fs_stat = {0};
-    bool  result = false;
-
-    if (stat(ebookfile, &fs_stat) == 0) {
-        result = (fs_stat.st_size > 0);
-    }
-
-    return result;
-}
-
-static void _PerformEverything(const WBEntry* wbe, const WBoAuthCred* wbcred) {
-
-    char* filename;
-    bool  is_already_downloaded;
-    EnsureEbookDirExists();
-
-    filename = GetEntryFileName(wbe);
-
-    if (NULL == filename) {
-        return;
-    }
-
-    is_already_downloaded = IsEntriesAlreadyDownloaded(wbe);
-
-    if (!is_already_downloaded) {
-        char* url = WBConfigForgeDownloadURL(wbe, wbcred);
-        GetEbook(url, filename);
-        free(url);
-    }
-
-    free(filename);
-}
-
