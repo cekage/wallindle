@@ -44,6 +44,48 @@ $ crossdev --stable -v -t arm-linux-gnueabi
 ```
 git clone https://github.com/cekage/wallindle.git
 ```
+- Download libcurl, libssl, libcrypt and libcrypto from the kindle using download_kindle_lib.sh :
+```
+$ cat download_kindle_lib.sh 
+#!/usr/bin/env bash
+
+DEST=lib/curlkindle/lib
+SRC=/usr/lib
+KINDLEIP=192.168.15.244
+
+for lib in ssl curl crypt
+do
+	scp root@${KINDLEIP}:${SRC}/lib${lib}*so ${DEST}
+done;
+
+$ ./download_kindle_lib.sh 
+
+
+Welcome to Kindle!
+
+root@192.168.15.244's password: 
+libssl.so              100%  287KB   6.0MB/s 286.7KB/s   00:00 
+
+
+Welcome to Kindle!
+
+root@192.168.15.244's password: 
+libcurl.so             100%  208KB   5.9MB/s 207.9KB/s   00:00 
+
+
+Welcome to Kindle!
+
+root@192.168.15.244's password: 
+libcrypt.so            100%   38KB   4.6MB/s  37.5KB/s   00:00 
+libcrypto.so           100% 1393KB   6.2MB/s   1.4MB/s   00:00
+
+$ ls -alh lib/curlkindle/lib/*.so
+-rwxr-xr-x 1 k users 1,4M  3 sept. 20:53 lib/curlkindle/lib/libcrypto.so
+-rw-r--r-- 1 k users  38K  3 sept. 20:53 lib/curlkindle/lib/libcrypt.so
+-rwxr-xr-x 1 k users 208K  3 sept. 20:53 lib/curlkindle/lib/libcurl.so
+-rwxr-xr-x 1 k users 287K  3 sept. 20:53 lib/curlkindle/lib/libssl.so
+
+```
 - Adjust binaries path and name in Makefile 
 - Make kindle native binary :
 ```sh
@@ -63,7 +105,7 @@ wallindle: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically l
 Basically, concatening (as a single line) host, client\_id, client\_secret,
 username and password in a file.
 ```sh
-# echo "wallabag.example.com 2_1xyggA5982e8oscs08os4ckckw00gcscs4g404sg44gg4gowoo 4u50vzwnrdwgo84c8wg8sgwskks888wskkc8o04o44kwg4080g root sV5G/aTjYRcNkSlTOsZuB78YG." > ./wallindle.cfg
+# echo "https://wallabag.example.com 2_1xyggA5982e8oscs08os4ckckw00gcscs4g404sg44gg4gowoo 4u50vzwnrdwgo84c8wg8sgwskks888wskkc8o04o44kwg4080g root sV5G/aTjYRcNkSlTOsZuB78YG." > ./wallindle.cfg
 ```
 
 ## Uploading to kindle
@@ -169,7 +211,7 @@ system: I mntroot:def:Making root filesystem writeable
 Add this line :
 
 ```
-00  */4 * * * (cp /mnt/base-us/documents/wallindle* /tmp;cd /tmp;chmod +x ./wallindle;(./wallindle > /mnt/base-us/documents/wallindle.log))
+00  */4 * * * (cd /mnt/us/documents/ && (./wallindle > wallindle.log))
 ```
 
 Verify the new content
@@ -182,7 +224,15 @@ Verify the new content
 */60 * * * * /usr/sbin/loginfo memusedump
 */15 * * * * /usr/sbin/loginfo powerdcheck
 
-00  */4 * * * (cp /mnt/base-us/documents/wallindle* /tmp;cd /tmp;chmod +x ./wallindle;(./wallindle > /mnt/base-us/documents/wallindle.log))
+00  */4 * * * (cd /mnt/us/documents/ && (./wallindle > wallindle.log))
+```
+
+Remount / read only :
+```sh
+[root@kindle root]# mntroot ro
+system: I mntroot:def:Making root filesystem read-only
+/dev/mmcblk0p1 on / type ext3 (ro,noatime,nodiratime)
+
 ```
 
 Restart cron agent :
