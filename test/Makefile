@@ -10,7 +10,9 @@ CFLAGS=-O0 -g -m64 -std=iso9899:1999
 #    -Wold-style-definition
 #    -Werror
 
-LDFLAGS=../lib/curl_x86_64/lib/libcurl.a -DCURL_STATICLIB -I../lib/curl_x86_64/include -lm
+$(eval CURL := `curl-config --libs`)
+$(eval CURL := `curl-config --static-libs`)
+LDFLAGS=$(CURL) -lm
 
 EXEC=alltests
 
@@ -22,6 +24,7 @@ OTHERC=../shared.c ../lib/jsmn/jsmn.c
 #	   ../lib/jsmn/jsmn.c
 
 
+
 all: clean build exec
 
 build:
@@ -31,7 +34,8 @@ exec:
 	./$(EXEC)
 
 valgrind: clean build
-	valgrind --leak-check=full ./$(EXEC)
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC)
+#	valgrind --leak-check=full ./$(EXEC)
 
 clean:
 	rm -rf $(EXEC)
