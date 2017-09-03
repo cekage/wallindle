@@ -21,7 +21,7 @@
 #
 ###########################################################################
 
-prefix=/tmp/curl/buildk
+prefix=./lib/curlkindle
 exec_prefix=${prefix}
 includedir=${prefix}/include
 
@@ -142,14 +142,14 @@ while test $# -gt 0; do
 	   CURLLIBDIR=""
 	fi
 	if test "Xno" = "Xyes"; then
-	  echo ${CURLLIBDIR}-lcurl -L/usr/arm-linux-gnueabi/libs -lidn -lssl -lcrypto -lrt -lssl -lcrypto -lz -lssl -lcrypto
+	  echo ${CURLLIBDIR} -I${includedir} -lcurl -lidn -lssl -lcrypto -lrt -lssl -lcrypto -lz -lssl -lcrypto
 	else
-	  echo ${CURLLIBDIR}-lcurl -L/usr/arm-linux-gnueabi/libs -lssl -lcrypto
+	  echo ${CURLLIBDIR} -I${includedir} -lcurl -lssl -lcrypto
 	fi
 	;;
 
     --static-libs)
-	echo ${exec_prefix}/lib/libcurl.a -L/usr/arm-linux-gnueabi/libs -lidn -lssl -lcrypto -lrt -lssl -lcrypto -lz -lssl -lcrypto
+	echo ${exec_prefix}/lib/libcurl.a -I${includedir} -lidn -lssl -lcrypto -lrt -lssl -lcrypto -lz -lssl -lcrypto
 	;;
 
     --configure)
