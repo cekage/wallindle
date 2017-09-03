@@ -26,7 +26,7 @@
 #include "http_request.h"
 #include "json_entries_parse.h"
 #include "configmanager.h"
-#include "entries_parse.h"
+//#include "entries_parse.h"
 #include "perform_entries.h"
 #include "entries_common.h"
 #include "json_oauth_parse.h"
@@ -58,12 +58,12 @@ static void UpdateKindleCatalog(void ) {
 }
 
 static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
+    unsigned int i;
 
     // Iterate entries until MAXIMUM or the first time id is zero
-    for (int i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
+    for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
 
-        //        _PrintEntry(&entries[i]);
-
+        char* ebookurl;
         // Retrieve file name
         char* filename = GetEntryFileName(&entries[i]);
 
@@ -79,10 +79,11 @@ static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
             free(filename);
             continue;
         }
-        printf("Downloading 0x%lux -> %s ",entries[i].id, filename);
+
+        printf("Downloading item %lu -> %s \n", entries[i].id, filename);
 
         // Compute Url for downloading ebook
-        char* ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
+        ebookurl = WBConfigForgeDownloadURL(&entries[i], &a_wbc);
 
         // If getting ebook raises an error
         if (WNDL_ERROR == GetEbook(ebookurl, filename)) {
@@ -91,8 +92,6 @@ static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
         };
 
         free(ebookurl);
-
-        //       }
         free(filename);
 
     }
@@ -124,6 +123,9 @@ int main(void ) {
 
     // Retrieve the forged url to get auth token
     oauthurl = WBConfigForgeoAuthURL(&a_wbc);
+
+    //    for debug :
+    //    printf("\noauthurl = \n%s\n", oauthurl);
 
     // Check if oAuth2 url is correctly build
     if (NULL == oauthurl) {
@@ -168,25 +170,28 @@ int main(void ) {
     // TODO(k) maybe another way than doubling free !
     free(getentriesurl);
 
-    // for debug : printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
+    //    for debug :
+    //    printf("\nentriesjsonresponse.memory = \n%s\n", entriesjsonresponse.memory);
 
     entries = JsonGetEntries(entriesjsonresponse.memory);
     free(entriesjsonresponse.memory);
 
     if (NULL != entries) {
+        unsigned int i;
         EnsureEbookDirExists();
         ProceedUpdate(entries, a_wbc);
-        for (int i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
+
+        for (i = 0; (i < MAXIMUM_ENTRIES) && (0 != entries[i].id); ++i) {
             WBEntryCleaup(&entries[i]);
         }
+
         free(entries);
         UpdateKindleCatalog();
     }
 
     WBConfigCleanup(&a_wbc);
 
-
-    printf("\nMischiefManaged!\n");
+    printf("\nMischief Managed!\n");
     return 0;
 }
 
