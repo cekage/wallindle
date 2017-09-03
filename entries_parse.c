@@ -23,29 +23,29 @@
 #include "http_request.h"
 #include "configmanager.h"
 
-#include "entries_parse.h"
+//#include "entries_parse.h"
 #include "json_common.h"
 
-static void WBReadDownloadedJsonEntries(const char* jsoncontent) {
+//static void WBReadDownloadedJsonEntries(const char* jsoncontent) {
+//
+//    int i;
+//    WBEntry* entries = JsonGetEntries(jsoncontent);
+//
+//    // Clean all created_at string
+//    for (i = 0; i < MAXIMUM_ENTRIES; ++i) {
+//        if (0 == entries[i].id) { break; }
+//
+//        free(entries[i].created_at);
+//    }
+//
+//    free(entries);
+//}
 
-    int i;
-    WBEntry* entries = JsonGetEntries(jsoncontent);
-
-    // Clean all created_at string
-    for (i = 0; i < MAXIMUM_ENTRIES; ++i) {
-        if (0 == entries[i].id) { break; }
-
-        free(entries[i].created_at);
-    }
-
-    free(entries);
-}
-
-static void _WBReadJsonEntries(const char* filename) {
-    char* jsoncontent;
-
-    jsoncontent = WBReadConfigFile(filename);
-    WBReadDownloadedJsonEntries(jsoncontent);
-
-    free(jsoncontent);
-}
+//static void _WBReadJsonEntries(const char* filename) {
+//    char* jsoncontent;
+//
+//    jsoncontent = WBReadConfigFile(filename);
+//    WBReadDownloadedJsonEntries(jsoncontent);
+//
+//    free(jsoncontent);
+//}
