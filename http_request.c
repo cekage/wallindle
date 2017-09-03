@@ -25,7 +25,9 @@
 
 #include <curl/curl.h>
 
+#include "perform_entries.h"
 #include "http_request.h"
+
 #include "shared.h"
 
 /*
@@ -77,8 +79,11 @@ size_t WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
  */
 wd_result GetJSON(const char* url, const void* jsonresponse) {
     // TODO(k) change proto as follows : char* GetJSON(const char* url)
+    //    printf(" url transmise : %s\n", url);
+
     CURL* curl_handle;
     CURLcode res;
+
     curl_global_init(CURL_GLOBAL_ALL);
     /* init the curl session */
     curl_handle = curl_easy_init();
@@ -96,7 +101,8 @@ wd_result GetJSON(const char* url, const void* jsonresponse) {
 
     /* check for error s*/
     if (CURLE_OK != res) {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        fprintf(stderr, "curl_easy_perform() failed: %d %s\n", res,
+                curl_easy_strerror(res));
     }
 
     /* clean up curl stuff*/
@@ -121,7 +127,11 @@ wd_result GetEbook(const char* url, const char* filename) {
 
     // Boilerplate for curl stuff
     CURL* curl;
-    CURLcode res;
+    wd_result result = WNDL_ERROR;
+
+    if (IsEbookAlreadyDownloaded(filename)) {
+        return WNDL_OK;
+    }
 
     curl = curl_easy_init();
 
@@ -136,19 +146,20 @@ wd_result GetEbook(const char* url, const char* filename) {
         curl_easy_setopt(curl, CURLOPT_USERAGENT, WALLINDLE_USERAGENT);
 
         // perform curl
-        res = curl_easy_perform(curl);
+        CURLcode res = curl_easy_perform(curl);
 
-        // If no error it's ok
-        if (CURLE_OK != res) {
+        if (CURLE_OK == res) { // If no error it's ok
+            result = WNDL_OK;
+        } else {
             // if not, print to stderr
             fprintf(stderr, "curl_easy_perform() failed : %s\n", curl_easy_strerror(res));
         }
 
         // close opened file
         fclose(file_handle);
-        // classic way to clean up a curl
-        curl_easy_cleanup(curl);
     }
 
-    return (CURLE_OK == res) ? WNDL_OK : WNDL_ERROR;
+    // classic way to clean up a curl
+    curl_easy_cleanup(curl);
+    return result;
 }
