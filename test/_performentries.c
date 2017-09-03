@@ -29,7 +29,7 @@ TEST performentries_geturl() {
     WBEntry wbe = (WBEntry) {false, false, 0x123, "DaTe"};
 
     WBoAuthCred wba = (WBoAuthCred) {
-        "exAmple.org", "10921029",
+        "https://exAmple.org", "10921029",
         "qlmksd,qcpsdqslkdqs,kdqjsmdl,qj",
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", "sUpErToKeN"
@@ -37,7 +37,7 @@ TEST performentries_geturl() {
 
     char* url = WBConfigForgeDownloadURL(&wbe, &wba);
     printf("url = %s\n", url);
-    ASSERT_STR_EQ("http://exAmple.org/api/entries/291/export.mobi?access_token=sUpErToKeN",
+    ASSERT_STR_EQ("https://exAmple.org/api/entries/291/export.mobi?access_token=sUpErToKeN",
                   url);
     free(url);
     PASS();
@@ -45,7 +45,7 @@ TEST performentries_geturl() {
 
 TEST performentries_complete() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_10.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_10.json");
     ASSERT(NULL != jsoncontent);
     WBEntry* entries = JsonGetEntries(jsoncontent);
     ASSERT(NULL != entries);
@@ -62,7 +62,7 @@ TEST performentries_complete() {
         if (0 == entries[i].id) {
                 break;
         }
-        _PerformEverything(&entries[i], &known);
+        _TestPerformEverything(&entries[i], &known);
         free(entries[i].created_at);
     }
 
