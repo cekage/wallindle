@@ -44,6 +44,7 @@ astyle:
 	 *.c *.h
 
 arm:
+	test -s lib/curlkindle/lib/libcrypto.so || { echo "libcurl.so not found. Run download_kindle_lib.sh (see README.md)."; exit 1; }
 #	$(eval CC := arm-linux-gnueabi-gcc)
 	$(eval CC := arm-kindle-linux-gnueabi-gcc)
 	$(eval CFLAGS := -O0 -std=iso9899:1999  )
