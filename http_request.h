@@ -20,6 +20,8 @@
 #ifndef HTTP_REQUEST_H
 #define HTTP_REQUEST_H
 
+#include <stddef.h>
+
 #include "shared.h"
 
 typedef struct MemoryStruct {
