@@ -73,12 +73,12 @@ static void ProceedUpdate(WBEntry* entries, WBoAuthCred a_wbc) {
             continue;
         }
 
-        // Check if ebook already exists
-        if (IsEbookAlreadyDownloaded(filename)) {
-            // in this case, free stuff and go to next entries
-            free(filename);
-            continue;
-        }
+//        // Check if ebook already exists
+//        if (IsEbookAlreadyDownloaded(filename)) {
+//            // in this case, free stuff and go to next entries
+//            free(filename);
+//            continue;
+//        }
 
         printf("Downloading item %lu -> %s \n", entries[i].id, filename);
 
