@@ -17,7 +17,7 @@
 #ifndef JSON_OAUTH_PARSE_H_INCLUDED
 #define JSON_OAUTH_PARSE_H_INCLUDED
 
-char* ExtractoAuth2Token(const char* jsonresponse);
+char* ExtractoAuth2Token(const char* jsonobject);
 
 #endif //JSON_OAUTH_PARSE_H_INCLUDED
 
