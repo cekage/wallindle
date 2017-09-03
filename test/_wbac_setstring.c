@@ -39,8 +39,8 @@ TEST wbac_setstring_ok() {
     _WBConfigStringSet(known.token, strlen(known.token),
                       &wac_default.token);
 
-    bool  result1 = _WBConfigCompare(&known, &wac_default);
-    bool  result2 = _WBConfigCompare(&wac_default, &known);
+    bool  result1 = _TestConfigCompare(&known, &wac_default);
+    bool  result2 = _TestConfigCompare(&wac_default, &known);
     WBConfigCleanup(&wac_default);
 
     ASSERT_EQ(true, result1);
@@ -55,7 +55,7 @@ TEST wbac_print() {
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", ""
     };
-    _WBConfigPrint(&known);
+    _TestConfigPrint(&known);
     PASS();
 }
 

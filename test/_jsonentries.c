@@ -16,7 +16,7 @@
 
 TEST jsonentries_get_ok() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_10.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_10.json");
     ASSERT(NULL != jsoncontent);
     free(jsoncontent);
     PASS();
@@ -24,7 +24,7 @@ TEST jsonentries_get_ok() {
 
 TEST jsonentries_get_count() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     int count = _GetTokenCount(jsoncontent);
     ASSERT_EQ(72, count);
@@ -34,7 +34,7 @@ TEST jsonentries_get_count() {
 
 TEST jsonentries_token_allocation() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     int count = _GetTokenCount(jsoncontent);
     jsmntok_t* tokens = _AllocateTokens(jsoncontent, count);
@@ -46,7 +46,7 @@ TEST jsonentries_token_allocation() {
 
 TEST jsonentries_token_allocation_too_big() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     jsmntok_t* tokens = _AllocateTokens(jsoncontent, 800);
     free(jsoncontent);
@@ -57,7 +57,7 @@ TEST jsonentries_token_allocation_too_big() {
 
 TEST jsonentries_token_allocation_too_low() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     jsmntok_t* tokens = _AllocateTokens(jsoncontent, 12);
     free(jsoncontent);
@@ -68,7 +68,7 @@ TEST jsonentries_token_allocation_too_low() {
 
 TEST jsonentries_token_search_embedded() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     int count = _GetTokenCount(jsoncontent);
     ASSERT(count > 0);
@@ -86,7 +86,7 @@ TEST jsonentries_token_search_embedded() {
 
 TEST jsonentries_token_search_notembedded() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     int count = _GetTokenCount(jsoncontent);
     ASSERT(count > 0);
@@ -104,7 +104,7 @@ TEST jsonentries_token_search_notembedded() {
 
 TEST jsonentries_token_search_items() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     int count = _GetTokenCount(jsoncontent);
     ASSERT(count > 0);
@@ -122,7 +122,7 @@ TEST jsonentries_token_search_items() {
 }
 TEST jsonentries_token_search_notitems() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_1.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_1.json");
     ASSERT(NULL != jsoncontent);
     int count = _GetTokenCount(jsoncontent);
     ASSERT(count > 0);
@@ -141,7 +141,7 @@ TEST jsonentries_token_search_notitems() {
 
 TEST jsonentries_get_entries() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_10.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_10.json");
     ASSERT(NULL != jsoncontent);
     WBEntry* entries = JsonGetEntries(jsoncontent);
     ASSERT(NULL != entries);
@@ -159,7 +159,7 @@ TEST jsonentries_get_entries() {
 
 TEST jsonentries_perform_entries() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/response_ok_total_10.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/response_ok_total_10.json");
     ASSERT(NULL != jsoncontent);
     WBEntry* entries = JsonGetEntries(jsoncontent);
     ASSERT(NULL != entries);
@@ -173,7 +173,7 @@ TEST jsonentries_perform_entries() {
     // Clean all created_at string
     for (int i = 0; i < MAXIMUM_ENTRIES; ++i) {
         if (0 == entries[i].id) { break; }
-        _PerformEverything(&entries[i], &known);
+        _TestPerformEverything(&entries[i], &known);
         free(entries[i].created_at);
     }
 
@@ -184,7 +184,7 @@ TEST jsonentries_perform_entries() {
 
 TEST jsonentries_perform_0_entries() {
     char* jsoncontent;
-    jsoncontent = _WBReadEntriesJsonFile("./files/2017-08-15-0700.json");
+    jsoncontent = _TestReadEntriesJsonFile("./files/2017-08-15-0700.json");
     ASSERT(NULL != jsoncontent);
     WBEntry* entries = JsonGetEntries(jsoncontent);
     ASSERT(NULL == entries);

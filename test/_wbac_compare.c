@@ -29,8 +29,8 @@ TEST wbac_compare_ok() {
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", ""
     };
-    bool  result1 = _WBConfigCompare(&known, &known2);
-    bool  result2 = _WBConfigCompare(&known2, &known);
+    bool  result1 = _TestConfigCompare(&known, &known2);
+    bool  result2 = _TestConfigCompare(&known2, &known);
     ASSERT_EQ(true, result1);
     ASSERT_EQ(true, result2);
     PASS();
@@ -49,8 +49,8 @@ TEST wbac_compare_nok_1() {
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", ""
     };
-    bool  result1 = _WBConfigCompare(&known, &known2);
-    bool  result2 = _WBConfigCompare(&known2, &known);
+    bool  result1 = _TestConfigCompare(&known, &known2);
+    bool  result2 = _TestConfigCompare(&known2, &known);
     ASSERT_EQ(false, result1);
     ASSERT_EQ(false, result2);
     PASS();
@@ -69,8 +69,8 @@ TEST wbac_compare_nok_2() {
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", ""
     };
-    bool  result1 = _WBConfigCompare(&known, &known2);
-    bool  result2 = _WBConfigCompare(&known2, &known);
+    bool  result1 = _TestConfigCompare(&known, &known2);
+    bool  result2 = _TestConfigCompare(&known2, &known);
     ASSERT_EQ(false, result1);
     ASSERT_EQ(false, result2);
     PASS();
@@ -89,8 +89,8 @@ TEST wbac_compare_nok_3() {
         "mqimqsdicmqsx<UZKJSHQS",
         "toto123", ""
     };
-    bool  result1 = _WBConfigCompare(&known, &known2);
-    bool  result2 = _WBConfigCompare(&known2, &known);
+    bool  result1 = _TestConfigCompare(&known, &known2);
+    bool  result2 = _TestConfigCompare(&known2, &known);
     ASSERT_EQ(false, result1);
     ASSERT_EQ(false, result2);
     PASS();
@@ -109,8 +109,8 @@ TEST wbac_compare_nok_4() {
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto7123", ""
     };
-    bool  result1 = _WBConfigCompare(&known, &known2);
-    bool  result2 = _WBConfigCompare(&known2, &known);
+    bool  result1 = _TestConfigCompare(&known, &known2);
+    bool  result2 = _TestConfigCompare(&known2, &known);
     ASSERT_EQ(false, result1);
     ASSERT_EQ(false, result2);
     PASS();
@@ -129,8 +129,8 @@ TEST wbac_compare_nok_5() {
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", "35714687687687"
     };
-    bool  result1 = _WBConfigCompare(&known, &known2);
-    bool  result2 = _WBConfigCompare(&known2, &known);
+    bool  result1 = _TestConfigCompare(&known, &known2);
+    bool  result2 = _TestConfigCompare(&known2, &known);
     ASSERT_EQ(false, result1);
     ASSERT_EQ(false, result2);
     PASS();
@@ -145,8 +145,8 @@ TEST wbac_compare_nok_6() {
     };
     WBoAuthCred wac_default;
     WBConfigInit(&wac_default);
-    bool  result1 = _WBConfigCompare(&known, &wac_default);
-    bool  result2 = _WBConfigCompare(&wac_default, &known);
+    bool  result1 = _TestConfigCompare(&known, &wac_default);
+    bool  result2 = _TestConfigCompare(&wac_default, &known);
     WBConfigCleanup(&wac_default);
     ASSERT_EQ(false, result1);
     ASSERT_EQ(false, result2);
@@ -158,8 +158,8 @@ TEST wbac_compare_two_default() {
     WBoAuthCred known;
     WBConfigInit(&wac_default);
     WBConfigInit(&known);
-    bool  result1 = _WBConfigCompare(&known, &wac_default);
-    bool  result2 = _WBConfigCompare(&wac_default, &known);
+    bool  result1 = _TestConfigCompare(&known, &wac_default);
+    bool  result2 = _TestConfigCompare(&wac_default, &known);
     WBConfigCleanup(&wac_default);
     WBConfigCleanup(&known);
     ASSERT_EQ(true, result1);

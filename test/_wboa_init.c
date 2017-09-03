@@ -57,13 +57,13 @@ TEST wboa_loop_init_cleanup() {
 TEST wboa_test_StringSet() {
     WBoAuth2Struct wbo;
     int result = _WBoAuth2Init(&wbo);
-    int resultset1 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
+    int resultset1 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
                                        &wbo.access_token);
-    int resultset2 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
+    int resultset2 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
                                        &wbo.refresh_token);
-    int resultset3 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
+    int resultset3 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
                                        &wbo.scope);
-    int resultset4 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
+    int resultset4 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
                                        &wbo.token_type);
     wbo.expires_in = LIMIT_DYNAMIC_STRING;
     _WBoAuth2Cleanup(&wbo);
@@ -79,7 +79,7 @@ TEST wboa_test_StringSet() {
 TEST wboa_test_StringSet_compare() {
     WBoAuth2Struct wbo;
     int result = _WBoAuth2Init(&wbo);
-    int resultset1 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
+    int resultset1 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK),
                                        &wbo.access_token);
 
     ASSERT_EQ(WNDL_OK, resultset1);
@@ -93,7 +93,7 @@ TEST wboa_test_StringSet_compare() {
 TEST wboa_test_StringSet_truncate_compare() {
     WBoAuth2Struct wbo;
     int result = _WBoAuth2Init(&wbo);
-    int resultset1 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK) / 2,
+    int resultset1 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK) / 2,
                                        &wbo.access_token);
     ASSERT_STRN_EQ(AUTH_URL_MASK, wbo.access_token, sizeof(AUTH_URL_MASK) / 2);
 
@@ -106,7 +106,7 @@ TEST wboa_test_StringSet_truncate_compare() {
 TEST wboa_test_StringSet_overflow_compare() {
     WBoAuth2Struct wbo;
     int result = _WBoAuth2Init(&wbo);
-    int resultset1 = _WBoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK) * 2,
+    int resultset1 = _TestoAuth2StringSet(AUTH_URL_MASK, sizeof(AUTH_URL_MASK) * 2,
                                        &wbo.access_token);
     ASSERT_STRN_EQ(AUTH_URL_MASK, wbo.access_token, sizeof(AUTH_URL_MASK) * 2);
 
@@ -118,7 +118,7 @@ TEST wboa_test_StringSet_overflow_compare() {
 
 TEST wboa_test_print() {
     WBoAuth2Struct wbo = (WBoAuth2Struct) {"ok1", "ok2", "ok3", "ok4", 1337};
-    _WBoAuth2Print(&wbo);
+    _TestoAuth2Print(&wbo);
     PASS();
 }
 

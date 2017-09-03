@@ -21,7 +21,7 @@ TEST jsonauth_get_ok() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_ok.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_ok.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -39,7 +39,7 @@ TEST jsonauth_get_nok() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_ok.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_ok.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -55,7 +55,7 @@ TEST jsonauth_get_nok_accesstoken() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_error_accesstoken.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_error_accesstoken.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -70,7 +70,7 @@ TEST jsonauth_get_nok_expiresin() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_error_expiresin.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_error_expiresin.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -85,7 +85,7 @@ TEST jsonauth_get_nok_refreshtoken() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_error_refreshtoken.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_error_refreshtoken.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -100,7 +100,7 @@ TEST jsonauth_get_nok_scope() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_error_scope.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_error_scope.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -115,7 +115,7 @@ TEST jsonauth_get_nok_tokentype() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_error_tokentype.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_error_tokentype.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -130,7 +130,7 @@ TEST jsonauth_get_nok_notjson() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/token_error_notjson.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/token_error_notjson.json");
     ASSERT(NULL != jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
@@ -145,7 +145,7 @@ TEST jsonauth_get_nok_nonexistant() {
     char* jsoncontent;
     char* token;
 
-    jsoncontent = _WBReadoAuthJsonFile("./files/nonexistant.json");
+    jsoncontent = _TestReadoAuthJsonFile("./files/nonexistant.json");
     ASSERT(NULL == jsoncontent);
 
     token = ExtractoAuth2Token(jsoncontent);
