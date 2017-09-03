@@ -18,6 +18,7 @@
 #define PERFORM_ENTRIES_H_INCLUDED
 
 #include "configmanager.h"
+#include "entries_common.h"
 
 // TODO(k) Add test
 bool  IsEbookAlreadyDownloaded(const char* ebookfile);
