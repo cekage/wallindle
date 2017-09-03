@@ -16,12 +16,12 @@
 
 TEST entriescommon_geturl() {
     WBoAuthCred wba = (WBoAuthCred) {
-        "exAmple.org", "400",
+        "https://exAmple.org", "400",
         "qlmksd,qcpsdqslkdqs,kdqjsmdl,qj",
         "mqimqsdicmqsx<sqidUOIUZKJSHQS",
         "toto123", "sUpErToKeN"
     };
-    #define EXPECTED ("http://exAmple.org/api/entries.json?access_token=sUpErToKeN&perPage=500&page=1&since=")
+    #define EXPECTED ("https://exAmple.org/api/entries.json?access_token=sUpErToKeN&perPage=500&page=1&since=")
     char* url = WBEntryFetchingURL(&wba);
     printf("url = %s\n", url);
     ASSERT_STRN_EQ(EXPECTED, url, sizeof(EXPECTED)-1);
