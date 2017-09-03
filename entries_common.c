@@ -39,7 +39,7 @@ char* WBEntryFetchingURL(WBoAuthCred* wbc) {
                                 + strlen(wbc->token) + 1
                               ) * sizeof(char);
 
-    url = calloc(url_size  + 1, sizeof(char));
+    url = calloc(url_size + 1, sizeof(char));
 
     if (NULL == url) {
         fprintf(stderr, "Cannot allocate fetching url");
@@ -59,16 +59,8 @@ char* WBEntryFetchingURL(WBoAuthCred* wbc) {
     return url;
 }
 
-void _PrintEntry(const WBEntry* wbe) {
-    printf("_PrintEntry\n");
-    printf("is_archived = %d\n", wbe->is_archived);
-    printf("is_starred = %d\n", wbe->is_starred);
-    printf("id = %lu\n", wbe->id);
-    printf("created_at= %s\n", wbe->created_at);
-}
-
 void WBEntryCleaup(WBEntry* wbe) {
     free(wbe->created_at);
-    wbe->created_at=NULL;
-    wbe->id=0;
+    wbe->created_at = NULL;
+    wbe->id = 0;
 }
