@@ -38,28 +38,30 @@
  *   returns: a pointer to the token (a string)
  */
 char* ExtractoAuth2Token(const char* jsonobject) {
-    int result;
+    int token_count;
     int index;
 
     /* We expect no more than 20 tokens */
     jsmntok_t tokens[20];
 
     // Get the count of tokens in jsonobject
-    result = _GetTokenCountExt(jsonobject, tokens,
-                               sizeof(tokens) / sizeof(tokens[0]));
+    token_count = _GetTokenCountExt(jsonobject, tokens,
+                                    sizeof(tokens) / sizeof(tokens[0]));
 
     // If something went wrong
-    if (result < 1) {
+    if (token_count < 1) {
         // quit here
         return NULL;
-    } else if (tokens[0].type != JSMN_OBJECT) {
+    }
+
+    if (tokens[0].type != JSMN_OBJECT) {
         // if it's not an object : error then quit.
         fprintf(stderr, "Object expected\n");
         return NULL;
     }
 
     /* Loop over all keys of the root object */
-    for (index = 1; index < result; ++index) {
+    for (index = 1; index < token_count; ++index) {
         // Check if we encounter a token named "access_token"
         if (_JsonEquivTo(jsonobject, &tokens[index], "access_token") == 0) {
             // So the usefull content is next token
@@ -74,11 +76,12 @@ char* ExtractoAuth2Token(const char* jsonobject) {
                 // if ok return a pointer to the token
                 return extracted_token;
             } else {
-                // elsewise, free token
+                // otherwise, free token
                 free(extracted_token);
             }
         }
     }
+
     // Here nothing usefull found -> return an error (NULL)
     return NULL;
 }

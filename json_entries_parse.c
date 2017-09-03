@@ -33,11 +33,65 @@
 
 #include "json_entries_parse.h"
 
+static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count);
+static wd_result _BuildTokens(const char* jsonresponse, jsmntok_t* tokens,
+                              int token_count);
 static WBEntry* _ExtractEntries(long int max_entries, jsmntok_t* tokens,
                                 const char* jsonresponse, int token_count, int index);
-static void _FindKeysAndStore(jsmntok_t* tokens,
-                              const char* jsonresponse, int index, unsigned int entry_index,
-                              WBEntry* entries);
+static void _FindKeysAndStore(jsmntok_t* tokens, const char* jsonresponse,
+                              int index, unsigned int entry_index, WBEntry* entries);
+static wd_result _GetJsonKeyPosition(const char* jsoncontent,
+                                     const jsmntok_t* tokens, unsigned int max_token_count, const char* key,
+                                     jsmntype_t tokentype, unsigned int* from);
+static int _GetMaxEntries(jsmntok_t* tokens, const char* jsonresponse,
+                          int token_count, unsigned int* pindex);
+static long int _GetMaxEntriesField(jsmntok_t* tokens, const char* jsonresponse,
+                                    unsigned int token_count, unsigned int* pindex, const char* field);
+
+// TODO(k) rething usage of must_continue (previously a return NULL)
+WBEntry* JsonGetEntries(const char* jsonresponse) {
+    WBEntry* entries = NULL;
+    long int max_entries;
+    unsigned int index = 1;
+    bool must_continue = true;
+
+    const unsigned int token_count = _GetTokenCount(jsonresponse);
+
+    if (0 >= token_count) {
+        return entries;
+    };
+
+    jsmntok_t* tokens = _AllocateTokens(jsonresponse, (size_t) token_count);
+
+
+    if (must_continue
+            && WNDL_ERROR == _BuildTokens(jsonresponse, tokens, token_count)) {
+        must_continue = false;
+    }
+
+    if (must_continue) {
+        max_entries = _GetMaxEntries(tokens, jsonresponse, token_count, &index);
+        must_continue = max_entries > 1;
+
+        _GetJsonKeyPosition(jsonresponse, tokens, token_count,
+                            "_embedded", JSMN_OBJECT, &index);
+        must_continue &= (token_count != index);
+
+        _GetJsonKeyPosition(jsonresponse, tokens, token_count,
+                            "items", JSMN_ARRAY, &index);
+        must_continue &= (token_count != index);
+
+    }
+
+    if (must_continue) {
+        index += 2;
+        entries = _ExtractEntries(max_entries, tokens, jsonresponse, token_count,
+                                  index);
+    }
+
+    free(tokens);
+    return entries;
+}
 
 static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count) {
 
@@ -59,16 +113,16 @@ static jsmntok_t* _AllocateTokens(const char* jsoncontent, size_t count) {
     return tokens;
 }
 
-// TODO(k) return WB ERROR / OK
-static int _GetJsonKeyPosition(const char* jsoncontent, const jsmntok_t* tokens,
-                               int max_token_count, const char* key,
-                               jsmntype_t tokentype, int* from) {
+// TODO(k): return WB ERROR / OK
+static wd_result _GetJsonKeyPosition(const char* jsoncontent,
+                                     const jsmntok_t* tokens, unsigned int max_token_count, const char* key,
+                                     jsmntype_t tokentype, unsigned int* from) {
     bool is_key_present;
 
     do {
         // Check key exists
-        is_key_present = (_JsonEquivTo(jsoncontent, &tokens[*from],
-                                       key) == 0);
+        is_key_present = (0 == _JsonEquivTo(jsoncontent, &tokens[*from],
+                                            key));
         // and if next item
         ++(*from);
 
@@ -76,22 +130,22 @@ static int _GetJsonKeyPosition(const char* jsoncontent, const jsmntok_t* tokens,
         is_key_present &= (tokens[*from].type == tokentype);
     } while (*from < max_token_count && !is_key_present);
 
-    if (*from == max_token_count) {
+    //if (*from == max_token_count) {
+    if (!is_key_present) {
         fprintf(stderr, "%s expected but not found\n", key);
     }
 
-    return (*from);
+    return is_key_present ? WNDL_OK : WNDL_ERROR;
 }
 
-static void _TokenPrint(jsmntok_t t) {
-    printf("Type=%d, start=%d, end=%d, size=%d\n", t.type, t.start, t.end, t.size);
-}
+//static void _TokenPrint(jsmntok_t t) {
+//    printf("Type=%d, start=%d, end=%d, size=%d\n", t.type, t.start, t.end, t.size);
+//}
 
 
-static long int _GetMaxEntriesField(jsmntok_t* tokens,
-                                    const char* jsonresponse,
-                                    int token_count, int* pindex, const char* field) {
-    int index = *pindex; // pointer to index
+static long int _GetMaxEntriesField(jsmntok_t* tokens, const char* jsonresponse,
+                                    unsigned int token_count, unsigned int* pindex, const char* field) {
+    unsigned int index = *pindex; // pointer to index
     char* str_value = NULL;
     long int numeric_value;
 
@@ -110,7 +164,8 @@ static long int _GetMaxEntriesField(jsmntok_t* tokens,
     StoreContent(jsonresponse + tokens[index].start,
                  MIN(tokens[index].end - tokens[index].start, 4), &str_value);
     // Convert in 10-basis to numeric_value
-    // TODO better check strtol
+
+    // TODO(k):  better check strtol
     numeric_value = strtol(str_value, NULL, 10);
     // Releasing str_value
     free(str_value);
@@ -118,7 +173,7 @@ static long int _GetMaxEntriesField(jsmntok_t* tokens,
 }
 
 static int _GetMaxEntries(jsmntok_t* tokens, const char* jsonresponse,
-                          int token_count, int* pindex) {
+                          int token_count, unsigned int* pindex) {
 
     long int total;
     long int pages; // Number of pages
@@ -133,8 +188,7 @@ static int _GetMaxEntries(jsmntok_t* tokens, const char* jsonresponse,
     }
 
     // Reaching key "total"
-    total = _GetMaxEntriesField(tokens, jsonresponse, token_count, pindex,
-                                "total");
+    total = _GetMaxEntriesField(tokens, jsonresponse, token_count, pindex, "total");
 
     if (total <= 0) {
         fprintf(stderr, "'total' primitive >1 expected\n");
@@ -168,52 +222,11 @@ static wd_result _BuildTokens(const char* jsonresponse, jsmntok_t* tokens,
 }
 
 
-// TODO(k) rething usage of must_continue (previously a return NULL)
-WBEntry* JsonGetEntries(const char* jsonresponse) {
-    WBEntry* entries = NULL;
-    long int max_entries;
-    int index = 1;
-    bool must_continue = true;
 
-    const int token_count = _GetTokenCount(jsonresponse);
-
-    must_continue = (token_count > 0);
-
-    jsmntok_t tokens[token_count];
-
-    if (must_continue
-            && WNDL_ERROR == _BuildTokens(jsonresponse, tokens, token_count)) {
-
-        must_continue = false;
-    }
-
-    if (must_continue) {
-        max_entries = _GetMaxEntries(tokens, jsonresponse, token_count, &index);
-        must_continue = max_entries > 1;
-
-        _GetJsonKeyPosition(jsonresponse, tokens, token_count,
-                            "_embedded", JSMN_OBJECT, &index);
-        must_continue &= (token_count != index);
-
-        _GetJsonKeyPosition(jsonresponse, tokens, token_count,
-                            "items", JSMN_ARRAY, &index);
-        must_continue &= (token_count != index);
-
-    }
-
-    if (must_continue) {
-        index += 2;
-        entries = _ExtractEntries(max_entries, tokens, jsonresponse, token_count,
-                                  index);
-    }
-
-    return entries;
-}
-
-static void _printtoken(jsmntok_t token, const char* json) {
-    printf("Token start:%d end:%d size:%d type:%d  --> %.*s\n", token.start,
-           token.end, token.size, token.type, 30, json + token.start);
-}
+//static void _printtoken(jsmntok_t token, const char* json) {
+//    printf("Token start:%d end:%d size:%d type:%d  --> %.*s\n", token.start,
+//           token.end, token.size, token.type, 30, json + token.start);
+//}
 
 static WBEntry* _ExtractEntries(long int max_entries, jsmntok_t* tokens,
                                 const char* jsonresponse, int token_count, int index) {
@@ -259,12 +272,8 @@ static WBEntry* _ExtractEntries(long int max_entries, jsmntok_t* tokens,
 #undef NEXT_ITEM
 }
 
-
-
-
 static void _FindKeysAndStore(jsmntok_t* tokens, const char* jsonresponse,
-                              int index,
-                              unsigned int entry_index, WBEntry* entries) {
+                              int index, unsigned int entry_index, WBEntry* entries) {
 
     // get size of tokens by subtitute start field to end field
     unsigned int token_size = tokens[index].end - tokens[index].start + 1;
