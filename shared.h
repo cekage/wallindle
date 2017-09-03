@@ -18,6 +18,7 @@
 #define SHARED_H_INCLUDED
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __arm__
 #define DBUS_CMD "/usr/bin/dbus-send"
@@ -38,7 +39,7 @@
 #define MIN_CONFFILE_SIZE (50)
 #define MAX_CONFFILE_SIZE (4096)
 
-#define AUTH_URL_MASK "http://%s/oauth/v2/token?grant_type=password&client_id=%s&client_secret=%s&username=%s&password=%s"
+#define AUTH_URL_MASK "%s/oauth/v2/token?grant_type=password&client_id=%s&client_secret=%s&username=%s&password=%s"
 
 #define FORMAT_EXPORT "mobi"
 
@@ -53,13 +54,13 @@
 #define MAXIMUM_ENTRIES (500)
 #define SMAXIMUM_ENTRIES "500"
 
-#define DOWNLOAD_URL_MASK "http://%s/api/entries/%lu/export." FORMAT_EXPORT "?access_token=%s"
+#define DOWNLOAD_URL_MASK "%s/api/entries/%lu/export." FORMAT_EXPORT "?access_token=%s"
 //#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d&sort=created"
-#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d"
+#define FETCH_ENTRIES_MASK "%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d"
 
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 
-#define UP_TO_X_DAYS (70)
+#define UP_TO_X_DAYS (7)
 
 #define WALLINDLE_USERAGENT ("agent-ckg-fait-mumuse-avec-libcurl/1.0")
 
