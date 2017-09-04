@@ -26,17 +26,17 @@ TEST wbac_setstring_ok() {
     WBoAuthCred wac_default;
     WBConfigInit(&wac_default);
 
-    _WBConfigStringSet(known.wallabag_host, strlen(known.wallabag_host),
+    StoreContent(known.wallabag_host, strlen(known.wallabag_host),
                       &wac_default.wallabag_host);
-    _WBConfigStringSet(known.client_id, strlen(known.client_id),
+    StoreContent(known.client_id, strlen(known.client_id),
                       &wac_default.client_id);
-    _WBConfigStringSet(known.client_secret, strlen(known.client_secret),
+    StoreContent(known.client_secret, strlen(known.client_secret),
                       &wac_default.client_secret);
-    _WBConfigStringSet(known.username, strlen(known.username),
+    StoreContent(known.username, strlen(known.username),
                       &wac_default.username);
-    _WBConfigStringSet(known.password, strlen(known.password),
+    StoreContent(known.password, strlen(known.password),
                       &wac_default.password);
-    _WBConfigStringSet(known.token, strlen(known.token),
+    StoreContent(known.token, strlen(known.token),
                       &wac_default.token);
 
     bool  result1 = _TestConfigCompare(&known, &wac_default);
