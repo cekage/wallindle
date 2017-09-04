@@ -57,7 +57,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
     const unsigned int token_count = _GetTokenCount(jsonresponse);
 
-    if (0 >= token_count) {
+    if (0 == token_count) {
         return entries;
     };
 
