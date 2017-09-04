@@ -50,19 +50,3 @@ static void _WBoAuth2Cleanup(WBoAuth2Struct* wbo) {
     wbo->expires_in = 0;
 #undef FREEFIELD
 }
-
-static void _WBoAuth2Print(const WBoAuth2Struct* wbo) {
-#define PRINTFIELD(FD) printf("wbo->%s(%" PRIuPTR "o.)=%s\n", #FD, strlen(wbo->FD), wbo->FD)
-    printf("\n");
-    PRINTFIELD(access_token);
-    PRINTFIELD(refresh_token);
-    PRINTFIELD(scope);
-    PRINTFIELD(token_type);
-    printf("wbo->token_type=%u\n", wbo->expires_in);
-#undef PRINTFIELD
-}
-
-static int _WBoAuth2StringSet(const char* content, size_t contentsize,
-                              char** wbofield) {
-    return StoreContent(content, contentsize, wbofield);
-}

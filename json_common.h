@@ -24,9 +24,6 @@
 wd_result _JsonEquivTo(const char* json, const jsmntok_t*
                        tok, const char* s);
 
-// TODO(k) Add test
-char* WBReadConfigFile(const char* filename);
-
 unsigned int _GetTokenCount(const char* jsonresponse);
 unsigned int _GetTokenCountExt(const char* jsonresponse, jsmntok_t* tokens,
                                unsigned int maxtoken);

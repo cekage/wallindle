@@ -73,10 +73,6 @@ wd_result _JsonEquivTo(const char* json, const jsmntok_t*
     return (result ? WNDL_OK : WNDL_ERROR);
 }
 
-char* WBReadConfigFile(const char* filename) {
-    return _WBReadFile(filename, true);
-}
-
 static char* _WBReadFile(const char* filename, bool isConfig) {
     off_t filesize;
     size_t  totalread;
