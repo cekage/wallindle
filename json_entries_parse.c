@@ -53,7 +53,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
     WBEntry* entries = NULL;
     long int max_entries;
     unsigned int index = 1;
-    bool must_continue = true;
+    bool must_continue;
 
     const unsigned int token_count = _GetTokenCount(jsonresponse);
 
@@ -62,7 +62,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
     };
 
     jsmntok_t* tokens = _AllocateTokens(jsonresponse, (size_t) token_count);
-
+    must_continue = (NULL != tokens);
 
     if (must_continue
             && WNDL_ERROR == _BuildTokens(jsonresponse, tokens, token_count)) {
@@ -71,7 +71,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
     if (must_continue) {
         max_entries = _GetMaxEntries(tokens, jsonresponse, token_count, &index);
-        must_continue = max_entries > 1;
+        must_continue = max_entries >= 1;
 
         _GetJsonKeyPosition(jsonresponse, tokens, token_count,
                             "_embedded", JSMN_OBJECT, &index);
