@@ -46,7 +46,7 @@ char* WBEntryFetchingURL(WBoAuthCred* wbc) {
         return NULL;
     }
 
-    last_week_in_utc = time(NULL) - UP_TO_X_DAYS * 24 * 60;
+    last_week_in_utc = time(NULL) - UP_TO_X_DAYS * 24 * 60 * 60;
     sprinted = snprintf(url, url_size, FETCH_ENTRIES_MASK,
                         wbc->wallabag_host, wbc->token, last_week_in_utc);
 
