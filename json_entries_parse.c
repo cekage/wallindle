@@ -71,7 +71,7 @@ WBEntry* JsonGetEntries(const char* jsonresponse) {
 
     if (must_continue) {
         max_entries = _GetMaxEntries(tokens, jsonresponse, token_count, &index);
-        must_continue = max_entries >= 1;
+        must_continue = (0 != max_entries);
 
         _GetJsonKeyPosition(jsonresponse, tokens, token_count,
                             "_embedded", JSMN_OBJECT, &index);
