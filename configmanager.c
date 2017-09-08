@@ -34,9 +34,6 @@ static wd_result _WBReadConfiguration(const char* filename, off_t filesize,
 static void _TestConfigPrint(const WBoAuthCred* wbc);
 static bool _TestConfigCompare(WBoAuthCred* wb1, WBoAuthCred* wb2);
 
-static int _WBConfigStringSet(const char* content, size_t  contentsize,
-                              char** wbcfield);
-
 /*
  * Function: WBConfigGet
  * ----------------------------
@@ -215,7 +212,7 @@ static void _FieldFindAndSave(bool* proceed, char* src, char** dest,
                 token[last_char_pos] = 0;
             }
 
-            _WBConfigStringSet(token, strlen(token), dest);
+            StoreContent(token, strlen(token), dest);
         } else {
             fprintf(stderr, "Cannot determine field %s\n", fieldname);
         }
@@ -229,7 +226,6 @@ static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
 
     off_t filesize;
     char* filecontent;
-    int readresult;
     bool must_continue = true;
 
 
@@ -246,7 +242,7 @@ static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     }
 
     if (must_continue) {
-        readresult = _WBReadConfiguration(cfg_filename, filesize, &filecontent);
+        int readresult = _WBReadConfiguration(cfg_filename, filesize, &filecontent);
         must_continue = (WNDL_OK == readresult);
         _FieldFindAndSave(&must_continue, filecontent, &wbcred->wallabag_host,
                           "wallabag_host");
@@ -261,11 +257,6 @@ static wd_result _WBConfigGet(WBoAuthCred* wbcred, const char* cfg_filename) {
     free(filecontent);
 
     return must_continue ? WNDL_OK : WNDL_ERROR;
-}
-
-static int _WBConfigStringSet(const char* content, size_t  contentsize,
-                              char** wbcfield) {
-    return StoreContent(content, contentsize, wbcfield);
 }
 
 static void _TestConfigPrint(const WBoAuthCred* wbc) {
