@@ -34,7 +34,7 @@
 #include "shared.h"
 
 static void UpdateKindleCatalog(void ) {
-    __pid_t pid = fork();
+    pid_t pid = fork();
 
     if (pid == -1) {
         fprintf(stderr, "Can't fork\n");
