@@ -56,7 +56,7 @@
 
 #define DOWNLOAD_URL_MASK "%s/api/entries/%lu/export." FORMAT_EXPORT "?access_token=%s"
 //#define FETCH_ENTRIES_MASK "http://%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d&sort=created"
-#define FETCH_ENTRIES_MASK "%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%d"
+#define FETCH_ENTRIES_MASK "%s/api/entries.json?access_token=%s&perPage=" SMAXIMUM_ENTRIES "&page=1&since=%u"
 
 #define DEFAULT_CONFIG_FILE "./wallindle.cfg"
 

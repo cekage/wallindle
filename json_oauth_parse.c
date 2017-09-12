@@ -39,7 +39,8 @@
  */
 char* ExtractoAuth2Token(const char* jsonobject) {
     int token_count;
-    int index;
+    unsigned int index;
+    char* result = NULL;
 
     /* We expect no more than 20 tokens */
     jsmntok_t tokens[20];
@@ -49,32 +50,35 @@ char* ExtractoAuth2Token(const char* jsonobject) {
                                     sizeof(tokens) / sizeof(tokens[0]));
 
     // If something went wrong
-    if (token_count < 1) {
+    if (0 >= token_count) {
         // quit here
         return NULL;
     }
 
-    if (tokens[0].type != JSMN_OBJECT) {
+    // We are sure token_count is always positive !
+
+    if (JSMN_OBJECT != tokens[0].type) {
         // if it's not an object : error then quit.
         fprintf(stderr, "Object expected\n");
         return NULL;
     }
 
     /* Loop over all keys of the root object */
-    for (index = 1; index < token_count; ++index) {
+    for (index = 1; index < (unsigned int) token_count; ++index) {
         // Check if we encounter a token named "access_token"
-        if (_JsonEquivTo(jsonobject, &tokens[index], "access_token") == 0) {
+        if (WNDL_OK == _JsonEquivTo(jsonobject, &tokens[index], "access_token")) {
+            char* extracted_token = NULL;
             // So the usefull content is next token
             ++index;
             /* We may use strndup() to fetch string value */
             size_t stringlength = (size_t)(tokens[index].end - tokens[index].start);
-            char* extracted_token = NULL;
 
             // Store content of token in extracted_token and checks result
             if (WNDL_OK == StoreContent(jsonobject + tokens[index].start,
                                         stringlength, &extracted_token)) {
                 // if ok return a pointer to the token
-                return extracted_token;
+                result = extracted_token;
+                break;
             } else {
                 // otherwise, free token
                 free(extracted_token);
@@ -83,5 +87,5 @@ char* ExtractoAuth2Token(const char* jsonobject) {
     }
 
     // Here nothing usefull found -> return an error (NULL)
-    return NULL;
+    return result;
 }
