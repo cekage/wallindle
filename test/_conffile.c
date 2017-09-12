@@ -47,7 +47,7 @@ TEST conffile_check_config_get_ok() {
     };
     WBoAuthCred a_wbc;
     WBConfigInit(&a_wbc);
-    int retourWD = _WBConfigGet(&a_wbc, "./files/wallindle.cfg");
+    wd_result retourWD = _WBConfigGet(&a_wbc, "./files/wallindle.cfg");
     bool  result1 = _TestConfigCompare(&known, &a_wbc);
     bool  result2 = _TestConfigCompare(&a_wbc, &known);
     WBConfigCleanup(&a_wbc);
@@ -60,8 +60,8 @@ TEST conffile_check_config_get_ok() {
 TEST conffile_check_config_get_not_ok() {
     WBoAuthCred a_wbc;
     WBConfigInit(&a_wbc);
-    int retour50 = _WBConfigGet(&a_wbc, "./files/size50.cfg");
-    int retour51 = _WBConfigGet(&a_wbc, "./files/size51.cfg");
+    wd_result retour50 = _WBConfigGet(&a_wbc, "./files/size50.cfg");
+    wd_result retour51 = _WBConfigGet(&a_wbc, "./files/size51.cfg");
     WBConfigCleanup(&a_wbc);
     ASSERT_EQ(retour50, WNDL_ERROR);
     ASSERT_EQ(retour51, WNDL_ERROR);
@@ -93,7 +93,7 @@ TEST conffile_check_forgedurl_not_ok() {
     char* forged_url = WBConfigForgeoAuthURL(&known);
     const  char* WANTED =
         "hXXps://wallabag.example.com/oauth/v2/token?grant_type=password&client_id=2_1xyggA5982e8oscs08os4ckckw00gcscs4g404sg44gg4gowoo&client_secret=4u50vzwnrdwgo84c8wg8sgwskks888wskkc8o04o44kwg4080g&username=root&password=sV5G/aTjYRcNkSlTOsZuB78YG.";
-    const  bool  result = strcmp(WANTED, forged_url) != 0;
+    const  bool  result = (0 != strcmp(WANTED, forged_url));
     free(forged_url);
     ASSERT(result);
     PASS();
@@ -102,7 +102,7 @@ TEST conffile_check_forgedurl_not_ok() {
 TEST conffile_check_forgedurl_ok2() {
     WBoAuthCred a_wbc;
     WBConfigInit(&a_wbc);
-    int retourWD = _WBConfigGet(&a_wbc, "./files/wallindle.cfg");
+    wd_result retourWD = _WBConfigGet(&a_wbc, "./files/wallindle.cfg");
     ASSERT_EQ(retourWD, WNDL_OK);
     char* forged_url = WBConfigForgeoAuthURL(&a_wbc);
     const  char* WANTED =
@@ -115,12 +115,12 @@ TEST conffile_check_forgedurl_ok2() {
 TEST conffile_check_forgedurl_not_ok2() {
     WBoAuthCred a_wbc;
     WBConfigInit(&a_wbc);
-    int retourWD = _WBConfigGet(&a_wbc, "./files/wallindle.cfg");
+    wd_result retourWD = _WBConfigGet(&a_wbc, "./files/wallindle.cfg");
     ASSERT_EQ(retourWD, WNDL_OK);
     char* forged_url = WBConfigForgeoAuthURL(&a_wbc);
     const  char* WANTED =
         "hXXp://wallabag.example.com/oauth/v2/token?grant_type=password&client_id=2_1xyggA5982e8oscs08os4ckckw00gcscs4g404sg44gg4gowoo&client_secret=4u50vzwnrdwgo84c8wg8sgwskks888wskkc8o04o44kwg4080g&username=root&password=sV5G/aTjYRcNkSlTOsZuB78YG.";
-    const  bool  result = strcmp(WANTED, forged_url) != 0;
+    const  bool  result = (0 != strcmp(WANTED, forged_url));
     WBConfigCleanup(&a_wbc);
     free(forged_url);
     ASSERT(result);
@@ -132,8 +132,8 @@ TEST conffile_check_default() {
     WBoAuthCred a_wbc2;
     WBConfigInit(&a_wbc1);
     WBConfigInit(&a_wbc2);
-    int retourWD1 = _WBConfigGet(&a_wbc1, "./files/wallindle.cfg");
-    int retourWD2 = WBConfigGet(&a_wbc2);
+    wd_result retourWD1 = _WBConfigGet(&a_wbc1, "./files/wallindle.cfg");
+    wd_result retourWD2 = WBConfigGet(&a_wbc2);
     bool  result1 = _TestConfigCompare(&a_wbc1, &a_wbc2);
     bool  result2 = _TestConfigCompare(&a_wbc2, &a_wbc1);
     WBConfigCleanup(&a_wbc1);
